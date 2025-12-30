@@ -1,0 +1,69 @@
+// src/types/index.ts
+export type UserRole = 'salesperson' | 'owner';
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  storeName: string;
+}
+
+export interface AuthTokens {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: number;
+}
+
+export interface Product {
+  id: string;
+  name: string;
+  code: string;
+  price: number;
+  stock?: number;
+  category?: string;
+}
+
+export interface CartItem {
+  product: Product;
+  quantity: number;
+}
+
+export type InvoiceStatus = 'PENDING' | 'SYNCED' | 'FAILED';
+
+export interface InvoiceItem {
+  productId: string;
+  productName: string;
+  productCode: string;
+  quantity: number;
+  price: number;
+  total: number;
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  salespersonId: string;
+  salespersonName: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax: number;
+  total: number;
+  createdAt: string;
+  syncStatus: InvoiceStatus;
+  syncedAt?: string;
+}
+
+export interface DailySales {
+  date: string;
+  totalSales: number;
+  invoiceCount: number;
+  topProduct?: string;
+}
+
+export interface SyncState {
+  lastSyncTime: string | null;
+  pendingInvoices: number;
+  isSyncing: boolean;
+  status: 'online' | 'offline' | 'syncing';
+}
