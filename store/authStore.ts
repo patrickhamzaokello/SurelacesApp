@@ -1,8 +1,8 @@
 // src/store/authStore.ts
 import { create } from 'zustand';
-import { User, AuthTokens } from '../types';
-import { secureStorage } from '../utils/secureStorage';
 import { apiClient } from '../api/apiClient';
+import { User } from '../types';
+import { secureStorage } from '../utils/secureStorage';
 
 interface AuthState {
   user: User | null;
@@ -26,6 +26,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (email: string, password: string) => {
     try {
       set({ isLoading: true, error: null });
+
+      
 
       const response = await apiClient.login(email, password);
       const { user, accessToken, refreshToken, expiresIn } = response;

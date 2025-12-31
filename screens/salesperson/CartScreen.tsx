@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useCartStore } from '../../store/cartStore';
 import { useInvoicesStore } from '../../store/invoicesStore';
 import { useAuth } from '../../hooks/useAuth';
@@ -16,7 +16,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { InvoiceItem } from '../../types';
 
 export const CartScreen = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
   const { user } = useAuth();
   const { items, removeItem, updateQuantity, clearCart, getSubtotal, getTax, getTotal } =
     useCartStore();
@@ -52,7 +52,7 @@ export const CartScreen = () => {
               clearCart();
               
               Alert.alert('Success', 'Invoice created successfully', [
-                { text: 'OK', onPress: () => navigation.navigate('Invoices' as never) },
+                { text: 'OK', onPress: () => router.push('/(salesperson)/invoices') },
               ]);
             } catch (error) {
               Alert.alert('Error', 'Failed to create invoice');
