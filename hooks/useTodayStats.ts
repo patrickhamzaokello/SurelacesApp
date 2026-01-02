@@ -8,13 +8,13 @@ export const useTodayStats = (salespersonId?: string) => {
 
   const todayStats = useMemo(() => {
     let todayInvoices = invoices.filter(invoice => 
-      isToday(new Date(invoice.createdAt))
+      isToday(new Date(invoice.created_at))
     );
 
     // Filter by salesperson if provided
     if (salespersonId) {
       todayInvoices = todayInvoices.filter(
-        invoice => invoice.salespersonId === salespersonId
+        invoice => invoice.salesperson === salespersonId
       );
     }
 
@@ -33,10 +33,10 @@ export const useTodayStats = (salespersonId?: string) => {
     
     todayInvoices.forEach(invoice => {
       invoice.items.forEach(item => {
-        if (!productCounts[item.productId]) {
-          productCounts[item.productId] = { name: item.productName, count: 0 };
+        if (!productCounts[item.product]) {
+          productCounts[item.product] = { name: item.product_name, count: 0 };
         }
-        productCounts[item.productId].count += item.quantity;
+        productCounts[item.product].count += item.quantity;
       });
     });
 

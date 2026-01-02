@@ -1,18 +1,18 @@
 // app/(auth)/login.tsx
+import { useAuthStore } from '@/store/authStore';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
-  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useAuthStore } from '@/store/authStore';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -25,12 +25,11 @@ export default function LoginScreen() {
       Alert.alert('Error', 'Please enter email and password');
       return;
     }
-
+  
     try {
-      await login(email, password);
-      
-      // Navigate based on role
-      if (user?.role === 'salesperson') {
+      const loggedInUser = await login(email, password);      
+      // Navigate based on role using the returned user
+      if (loggedInUser?.role === 'salesperson') {
         router.replace('/(salesperson)/home');
       } else {
         router.replace('/(owner)/dashboard');

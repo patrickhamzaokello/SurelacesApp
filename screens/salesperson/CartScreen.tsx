@@ -40,9 +40,9 @@ export const CartScreen = () => {
           onPress: async () => {
             try {
               const invoiceItems: InvoiceItem[] = items.map((item) => ({
-                productId: item.product.id,
-                productName: item.product.name,
-                productCode: item.product.code,
+                product: item.product.id,
+                product_name: item.product.name,
+                product_code: item.product.code,
                 quantity: item.quantity,
                 price: item.product.price,
                 total: item.product.price * item.quantity,

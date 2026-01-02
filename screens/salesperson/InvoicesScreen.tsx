@@ -1,20 +1,24 @@
 // src/screens/salesperson/InvoicesScreen.tsx
 import React, { useEffect } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { EmptyState } from '../../components/EmptyState';
+import { InvoiceCard } from '../../components/InvoiceCard';
 import { useAuth } from '../../hooks/useAuth';
 import { useInvoicesStore } from '../../store/invoicesStore';
-import { InvoiceCard } from '../../components/InvoiceCard';
-import { EmptyState } from '../../components/EmptyState';
 
 export const SalespersonInvoicesScreen = () => {
   const { user } = useAuth();
-  const { invoices, isLoading, fetchInvoices } = useInvoicesStore();
+  const { invoices, isLoading, fetchInvoices, loadLocalInvoices } = useInvoicesStore();
 
   const myInvoices = invoices.filter(
     (invoice) => invoice.salesperson === user?.user_id
   );
-
+  
   useEffect(() => {
+    // Load local invoices first (instant)
+    loadLocalInvoices();
+    
+    // Then try to fetch from server (will merge with local)
     fetchInvoices({ salespersonId: user?.user_id });
   }, []);
 

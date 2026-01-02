@@ -34,12 +34,12 @@ export interface CartItem {
 export type InvoiceStatus = 'PENDING' | 'SYNCED' | 'FAILED';
 
 export interface InvoiceItem {
-  productId: string;
-  productName: string;
-  productCode: string;
+  product: string;          // UUID - required by backend
+  product_name: string;
+  product_code: string;
   quantity: number;
   price: number;
-  total: number;
+  total?: number;
 }
 
 export interface Invoice {

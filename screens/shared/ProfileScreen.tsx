@@ -51,7 +51,7 @@ export const ProfileScreen = () => {
         <Text style={styles.sectionTitle}>Store Information</Text>
         <View style={styles.infoCard}>
           <Text style={styles.infoLabel}>Store Name</Text>
-          <Text style={styles.infoValue}>{user?.storeName}</Text>
+          <Text style={styles.infoValue}>{user?.store_name}</Text>
         </View>
       </View>
 

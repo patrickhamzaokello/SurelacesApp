@@ -48,15 +48,15 @@ export const OwnerReportsScreen = () => {
     const productStats: Record<string, { name: string; quantity: number; revenue: number }> = {};
     invoices.forEach(inv => {
       inv.items.forEach(item => {
-        if (!productStats[item.productId]) {
-          productStats[item.productId] = {
-            name: item.productName,
+        if (!productStats[item.product]) {
+          productStats[item.product] = {
+            name: item.product_name,
             quantity: 0,
             revenue: 0,
           };
         }
-        productStats[item.productId].quantity += item.quantity;
-        productStats[item.productId].revenue += item.total;
+        productStats[item.product].quantity += item.quantity;
+        productStats[item.product].revenue += item.total? item.total : 0;
       });
     });
 

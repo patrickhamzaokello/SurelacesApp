@@ -21,7 +21,7 @@ interface AuthState {
   isLoading: boolean;
   error: string | null;
 
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   logout: () => Promise<void>;
   loadStoredAuth: () => Promise<void>;
   setUser: (user: User) => void;
@@ -34,74 +34,75 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: true,
   error: null,
 
-  login: async (email: string, password: string) => {
-    try {
-      set({ isLoading: true, error: null });
+  // src/store/authStore.ts
+login: async (email: string, password: string) => {
+  try {
+    set({ isLoading: true, error: null });
 
-      const response = await apiClient.login(email, password);
+    const response = await apiClient.login(email, password);
 
-      // Destructure user fields directly from root
-      const {
-        user_id,
-        name,
-        username,
-        store_id,
-        store_name,
-        role,
-        tokens,
-      } = response;
+    const {
+      user_id,
+      name,
+      username,
+      store_id,
+      store_name,
+      role,
+      tokens,
+    } = response;
 
-      const user: User = {
-        user_id,
-        name,
-        email, // email was sent in request, but also returned — use returned one if preferred
-        username,
-        store_id,
-        store_name,
-        role,
-      };
+    const user: User = {
+      user_id,
+      name,
+      email,
+      username,
+      store_id,
+      store_name,
+      role,
+    };
 
-      const accessToken = tokens.access;
-      const refreshToken = tokens.refresh;
+    const accessToken = tokens.access;
+    const refreshToken = tokens.refresh;
 
-      // Try to get expiration from access token, fallback to 4 minutes if unable to decode
-      let expiresAt = decodeJwtExp(accessToken);
-      if (!expiresAt) {
-        console.warn('Could not decode JWT exp, using fallback expiration (4 minutes)');
-        expiresAt = Date.now() + 60 * 4 * 1000; // 4 fallback
-      }
-
-      const authTokens: AuthTokens = {
-        accessToken,
-        refreshToken,
-        expiresAt,
-      };
-
-      await Promise.all([
-        secureStorage.saveTokens(authTokens),
-        secureStorage.saveUser(user),
-      ]);
-
-      set({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-        error: null,
-      });
-    } catch (error: any) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        'Login failed. Please try again.';
-
-      set({
-        error: message,
-        isLoading: false,
-        isAuthenticated: false,
-      });
-      throw error;
+    let expiresAt = decodeJwtExp(accessToken);
+    if (!expiresAt) {
+      console.warn('Could not decode JWT exp, using fallback expiration (4 minutes)');
+      expiresAt = Date.now() + 60 * 4 * 1000;
     }
-  },
+
+    const authTokens: AuthTokens = {
+      accessToken,
+      refreshToken,
+      expiresAt,
+    };
+
+    await Promise.all([
+      secureStorage.saveTokens(authTokens),
+      secureStorage.saveUser(user),
+    ]);
+
+    set({
+      user,
+      isAuthenticated: true,
+      isLoading: false,
+      error: null,
+    });
+
+    return user; // Return the user object
+  } catch (error: any) {
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      'Login failed. Please try again.';
+
+    set({
+      error: message,
+      isLoading: false,
+      isAuthenticated: false,
+    });
+    throw error;
+  }
+},
 
   logout: async () => {
     await secureStorage.clearAll();
