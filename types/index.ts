@@ -1,12 +1,14 @@
 // src/types/index.ts
-export type UserRole = 'salesperson' | 'owner';
+export type UserRole = 'salesperson' | 'owner' | 'manager';
 
 export interface User {
-  id: string;
+  user_id: string;
   name: string;
   email: string;
+  username: string;
+  store_id: string;
+  store_name: string;
   role: UserRole;
-  storeName: string;
 }
 
 export interface AuthTokens {
@@ -42,17 +44,18 @@ export interface InvoiceItem {
 
 export interface Invoice {
   id: string;
-  invoiceNumber: string;
-  salespersonId: string;
-  salespersonName: string;
+  invoice_number: string;
+  salesperson: string;
+  salesperson_name: string;
   items: InvoiceItem[];
   subtotal: number;
   tax: number;
   total: number;
-  createdAt: string;
-  syncStatus: InvoiceStatus;
-  syncedAt?: string;
+  created_at: string;
+  sync_status: InvoiceStatus;
+  synced_at?: string;
 }
+
 
 export interface DailySales {
   date: string;

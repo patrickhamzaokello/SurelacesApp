@@ -1,15 +1,26 @@
 // src/store/authStore.ts
 import { create } from 'zustand';
 import { apiClient } from '../api/apiClient';
-import { User } from '../types';
+import { AuthTokens, User } from '../types'; // Assuming you moved AuthTokens to types.ts or keep it here
 import { secureStorage } from '../utils/secureStorage';
+
+// Simple JWT decode (only for exp claim, no verification)
+const decodeJwtExp = (token: string): number | null => {
+  try {
+    const payload = token.split('.')[1];
+    const decoded = JSON.parse(atob(payload));
+    return decoded.exp ? decoded.exp * 1000 : null; // exp is in seconds
+  } catch {
+    return null;
+  }
+};
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
-  
+
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   loadStoredAuth: () => Promise<void>;
@@ -27,20 +38,49 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
 
-      
-
       const response = await apiClient.login(email, password);
-      const { user, accessToken, refreshToken, expiresIn } = response;
 
-      const expiresAt = Date.now() + expiresIn * 1000;
+      // Destructure user fields directly from root
+      const {
+        user_id,
+        name,
+        username,
+        store_id,
+        store_name,
+        role,
+        tokens,
+      } = response;
 
-      await secureStorage.saveTokens({
+      const user: User = {
+        user_id,
+        name,
+        email, // email was sent in request, but also returned — use returned one if preferred
+        username,
+        store_id,
+        store_name,
+        role,
+      };
+
+      const accessToken = tokens.access;
+      const refreshToken = tokens.refresh;
+
+      // Try to get expiration from access token, fallback to 4 minutes if unable to decode
+      let expiresAt = decodeJwtExp(accessToken);
+      if (!expiresAt) {
+        console.warn('Could not decode JWT exp, using fallback expiration (4 minutes)');
+        expiresAt = Date.now() + 60 * 4 * 1000; // 4 fallback
+      }
+
+      const authTokens: AuthTokens = {
         accessToken,
         refreshToken,
         expiresAt,
-      });
+      };
 
-      await secureStorage.saveUser(user);
+      await Promise.all([
+        secureStorage.saveTokens(authTokens),
+        secureStorage.saveUser(user),
+      ]);
 
       set({
         user,
@@ -49,8 +89,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         error: null,
       });
     } catch (error: any) {
+      const message =
+        error.response?.data?.message ||
+        error.message ||
+        'Login failed. Please try again.';
+
       set({
-        error: error.response?.data?.message || 'Login failed',
+        error: message,
         isLoading: false,
         isAuthenticated: false,
       });
@@ -84,6 +129,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isLoading: false,
         });
       } else {
+        // Expired or missing → clear everything
         await secureStorage.clearAll();
         set({
           user: null,
@@ -92,6 +138,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         });
       }
     } catch (error) {
+      console.error('Failed to load stored auth:', error);
+      await secureStorage.clearAll();
       set({
         user: null,
         isAuthenticated: false,

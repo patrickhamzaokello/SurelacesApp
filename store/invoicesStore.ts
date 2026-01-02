@@ -1,8 +1,8 @@
 // src/store/invoicesStore.ts
-import { create } from 'zustand';
-import { Invoice, InvoiceItem } from '../types';
-import { apiClient } from '../api/apiClient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { create } from 'zustand';
+import { apiClient } from '../api/apiClient';
+import { Invoice, InvoiceItem } from '../types';
 
 const INVOICES_KEY = 'local_invoices';
 
@@ -33,15 +33,15 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
 
       const invoice: Invoice = {
         id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        invoiceNumber: `INV-${Date.now()}`,
-        salespersonId: userId,
-        salespersonName: userName,
+        invoice_number: `INV-${Date.now()}`,
+        salesperson: userId,
+        salesperson_name: userName,
         items,
         subtotal,
         tax,
         total,
-        createdAt: new Date().toISOString(),
-        syncStatus: 'PENDING',
+        created_at: new Date().toISOString(),
+        sync_status: 'PENDING',
       };
 
       set(state => ({
@@ -109,7 +109,7 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
       
       set(state => ({
         invoices: state.invoices.map(inv =>
-          inv.syncStatus === 'PENDING'
+          inv.sync_status === 'PENDING'
             ? { ...inv, syncStatus: 'SYNCED', syncedAt: new Date().toISOString() }
             : inv
         ),
@@ -127,7 +127,7 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
   },
 
   getPendingInvoices: () => {
-    return get().invoices.filter(invoice => invoice.syncStatus === 'PENDING');
+    return get().invoices.filter(invoice => invoice.sync_status === 'PENDING');
   },
 
   loadLocalInvoices: async () => {

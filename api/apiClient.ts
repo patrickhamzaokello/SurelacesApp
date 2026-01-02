@@ -1,8 +1,8 @@
 // src/api/apiClient.ts
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosError } from 'axios';
+import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { secureStorage } from '../utils/secureStorage';
 
-const API_BASE_URL = 'https://api.yourstore.com/v1'; // Replace with your API URL
+const API_BASE_URL = 'https://surelaces.mwonya.com/'; // Replace with your API URL
 
 class ApiClient {
   private client: AxiosInstance;
@@ -76,7 +76,7 @@ class ApiClient {
             }
 
             // Call refresh endpoint
-            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+            const response = await axios.post(`${API_BASE_URL}/auth/auth/token/refresh/`, {
               refreshToken: tokens.refreshToken,
             });
 
@@ -125,32 +125,35 @@ class ApiClient {
 
   // API Methods
   async login(email: string, password: string) {
-    const response = await this.client.post('/auth/login', { email, password });
+    const response = await this.client.post('/auth/auth/login/', { email, password });
     return response.data;
   }
 
   async getProducts() {
-    const response = await this.client.get('/products');
-    return response.data;
+    const response = await this.client.get('/pos/products/');
+    return response.data.results;
   }
 
   async createInvoice(invoice: any) {
-    const response = await this.client.post('/invoices', invoice);
+    const response = await this.client.post('/pos/invoices/', invoice);
     return response.data;
   }
 
   async getInvoices(params?: { startDate?: string; endDate?: string; salespersonId?: string }) {
-    const response = await this.client.get('/invoices', { params });
-    return response.data;
+    const response = await this.client.get('/pos/invoices/', { params });
+    return response.data.results;
   }
 
   async getDashboardStats() {
-    const response = await this.client.get('/dashboard/stats');
+    const response = await this.client.get('/pos/dashboard/stats/');
     return response.data;
   }
 
   async syncPendingInvoices(invoices: any[]) {
-    const response = await this.client.post('/invoices/bulk', { invoices });
+
+    console.log('Syncing invoices:', invoices); // Debug log
+
+    const response = await this.client.post('/pos/invoices/bulk-sync/', { invoices });
     return response.data;
   }
 

@@ -12,7 +12,7 @@ import { EmptyState } from '../../components/EmptyState';
 export const SalespersonHomeScreen = () => {
   const navigation = useNavigation();
   const { user } = useAuth();
-  const stats = useTodayStats(user?.id);
+  const stats = useTodayStats(user?.user_id);
   const { pendingInvoices } = useSync();
 
   return (

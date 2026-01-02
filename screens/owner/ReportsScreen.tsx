@@ -14,34 +14,34 @@ export const OwnerReportsScreen = () => {
 
     // Daily stats
     const today = invoices.filter(inv => 
-      format(new Date(inv.createdAt), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd')
+      format(new Date(inv.created_at), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd')
     );
     const dailySales = today.reduce((sum, inv) => sum + inv.total, 0);
 
     // Weekly stats
     const weekInvoices = invoices.filter(inv =>
-      isWithinInterval(new Date(inv.createdAt), { start: weekStart, end: now })
+      isWithinInterval(new Date(inv.created_at), { start: weekStart, end: now })
     );
     const weeklySales = weekInvoices.reduce((sum, inv) => sum + inv.total, 0);
 
     // Monthly stats
     const monthInvoices = invoices.filter(inv =>
-      isWithinInterval(new Date(inv.createdAt), { start: monthStart, end: now })
+      isWithinInterval(new Date(inv.created_at), { start: monthStart, end: now })
     );
     const monthlySales = monthInvoices.reduce((sum, inv) => sum + inv.total, 0);
 
     // Sales by salesperson
     const salesBySalesperson: Record<string, { name: string; total: number; count: number }> = {};
     invoices.forEach(inv => {
-      if (!salesBySalesperson[inv.salespersonId]) {
-        salesBySalesperson[inv.salespersonId] = {
-          name: inv.salespersonName,
+      if (!salesBySalesperson[inv.salesperson]) {
+        salesBySalesperson[inv.salesperson] = {
+          name: inv.salesperson_name,
           total: 0,
           count: 0,
         };
       }
-      salesBySalesperson[inv.salespersonId].total += inv.total;
-      salesBySalesperson[inv.salespersonId].count += 1;
+      salesBySalesperson[inv.salesperson].total += inv.total;
+      salesBySalesperson[inv.salesperson].count += 1;
     });
 
     // Top products

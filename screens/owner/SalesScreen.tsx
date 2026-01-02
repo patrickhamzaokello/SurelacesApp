@@ -24,7 +24,7 @@ export const OwnerSalesScreen = () => {
   }, []);
 
   const filteredInvoices = filter === 'today'
-    ? invoices.filter(inv => isToday(new Date(inv.createdAt)))
+    ? invoices.filter(inv => isToday(new Date(inv.created_at)))
     : invoices;
 
   if (isLoading && invoices.length === 0) {

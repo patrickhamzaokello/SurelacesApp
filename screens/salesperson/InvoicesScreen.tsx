@@ -11,11 +11,11 @@ export const SalespersonInvoicesScreen = () => {
   const { invoices, isLoading, fetchInvoices } = useInvoicesStore();
 
   const myInvoices = invoices.filter(
-    (invoice) => invoice.salespersonId === user?.id
+    (invoice) => invoice.salesperson === user?.user_id
   );
 
   useEffect(() => {
-    fetchInvoices({ salespersonId: user?.id });
+    fetchInvoices({ salespersonId: user?.user_id });
   }, []);
 
   if (isLoading && invoices.length === 0) {

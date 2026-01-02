@@ -16,7 +16,7 @@ export const InvoiceCard: React.FC<InvoiceCardProps> = ({
   showSalesperson = false,
 }) => {
   const getStatusColor = () => {
-    switch (invoice.syncStatus) {
+    switch (invoice.sync_status) {
       case 'SYNCED':
         return '#4CAF50';
       case 'PENDING':
@@ -29,7 +29,7 @@ export const InvoiceCard: React.FC<InvoiceCardProps> = ({
   };
 
   const getStatusIcon = () => {
-    switch (invoice.syncStatus) {
+    switch (invoice.sync_status) {
       case 'SYNCED':
         return '🟢';
       case 'PENDING':
@@ -45,28 +45,28 @@ export const InvoiceCard: React.FC<InvoiceCardProps> = ({
     <TouchableOpacity style={styles.container} onPress={onPress}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <Text style={styles.invoiceNumber}>{invoice.invoiceNumber}</Text>
+          <Text style={styles.invoiceNumber}>{invoice.invoice_number}</Text>
           <Text style={styles.date}>
-            {format(new Date(invoice.createdAt), 'MMM d, yyyy h:mm a')}
+            {format(new Date(invoice.created_at), 'MMM d, yyyy h:mm a')}
           </Text>
         </View>
         <View style={styles.statusBadge}>
           <Text style={styles.statusIcon}>{getStatusIcon()}</Text>
           <Text style={[styles.statusText, { color: getStatusColor() }]}>
-            {invoice.syncStatus}
+            {invoice.sync_status}
           </Text>
         </View>
       </View>
 
       {showSalesperson && (
-        <Text style={styles.salesperson}>By: {invoice.salespersonName}</Text>
+        <Text style={styles.salesperson}>By: {invoice.salesperson_name}</Text>
       )}
 
       <View style={styles.footer}>
         <Text style={styles.itemsCount}>
           {invoice.items.length} item{invoice.items.length !== 1 ? 's' : ''}
         </Text>
-        <Text style={styles.total}>${invoice.total.toFixed(2)}</Text>
+        <Text style={styles.total}>${invoice.total}</Text>
       </View>
     </TouchableOpacity>
   );

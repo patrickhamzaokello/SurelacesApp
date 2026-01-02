@@ -18,8 +18,8 @@ export const OwnerDashboardScreen = () => {
   // Get active salespeople count
   const activeSalespeople = new Set(
     invoices
-      .filter(inv => new Date(inv.createdAt).toDateString() === new Date().toDateString())
-      .map(inv => inv.salespersonId)
+      .filter(inv => new Date(inv.created_at).toDateString() === new Date().toDateString())
+      .map(inv => inv.salesperson)
   ).size;
 
   return (
