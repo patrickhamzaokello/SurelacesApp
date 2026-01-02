@@ -149,13 +149,11 @@ class ApiClient {
     return response.data;
   }
 
-  async syncPendingInvoices(invoices: any[]) {
-
-    console.log('Syncing invoices:', invoices); // Debug log
-
-    const response = await this.client.post('/pos/invoices/bulk-sync/', { invoices });
+  async bulkSyncInvoices (data: { invoices: any[] }) {
+    const response = await this.client.post('/pos/invoices/bulk-sync/', data);
     return response.data;
-  }
+  };
+  
 
   // Add more API methods as needed
   getClient() {

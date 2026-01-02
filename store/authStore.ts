@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { apiClient } from '../api/apiClient';
 import { AuthTokens, User } from '../types'; // Assuming you moved AuthTokens to types.ts or keep it here
 import { secureStorage } from '../utils/secureStorage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Simple JWT decode (only for exp claim, no verification)
 const decodeJwtExp = (token: string): number | null => {
@@ -106,6 +107,7 @@ login: async (email: string, password: string) => {
 
   logout: async () => {
     await secureStorage.clearAll();
+    await AsyncStorage.removeItem('local_invoices');
     set({
       user: null,
       isAuthenticated: false,
