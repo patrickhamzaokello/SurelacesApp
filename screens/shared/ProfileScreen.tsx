@@ -1,26 +1,58 @@
 // src/screens/shared/ProfileScreen.tsx
+import { useInvoicesStore } from '@/store/invoicesStore';
+import { format } from 'date-fns';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SyncIndicator } from '../../components/SyncIndicator';
 import { useAuth } from '../../hooks/useAuth';
 import { useSync } from '../../hooks/useSync';
-import { SyncIndicator } from '../../components/SyncIndicator';
-import { format } from 'date-fns';
 
 export const ProfileScreen = () => {
   const { user, logout, isSalesperson, isOwner } = useAuth();
   const { lastSyncTime, startSync, isSyncing } = useSync();
-
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-        },
-      },
-    ]);
+  const handleLogout = async () => {
+    const invoicesStore = useInvoicesStore.getState();
+    const pendingCount = invoicesStore.getPendingInvoices().length;
+    
+    if (pendingCount > 0) {
+      Alert.alert(
+        'Unsynced Invoices',
+        `You have ${pendingCount} invoice(s) that haven't been synced to the server. They will be lost if you log out now.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Try Sync',
+            onPress: async () => {
+              try {
+                await invoicesStore.syncPendingInvoices();
+                // Check again after sync
+                const stillPending = invoicesStore.getPendingInvoices().length;
+                if (stillPending === 0) {
+                  await logout();
+                } else {
+                  Alert.alert('Sync Failed', 'Unable to sync invoices. Try again later or logout anyway?', [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Logout Anyway', onPress: logout, style: 'destructive' },
+                  ]);
+                }
+              } catch (error) {
+                Alert.alert('Sync Failed', 'Unable to sync invoices');
+              }
+            },
+          },
+          {
+            text: 'Logout Anyway',
+            onPress: logout,
+            style: 'destructive',
+          },
+        ]
+      );
+    } else {
+      Alert.alert('Logout', 'Are you sure you want to logout?', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', onPress: logout },
+      ]);
+    }
   };
 
   const handleSync = async () => {
