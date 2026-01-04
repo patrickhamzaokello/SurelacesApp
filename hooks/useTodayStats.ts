@@ -11,6 +11,8 @@ export const useTodayStats = (salespersonId?: string) => {
       isToday(new Date(invoice.created_at))
     );
 
+    console.log('Today Invoices:', todayInvoices);
+
     // Filter by salesperson if provided
     if (salespersonId) {
       todayInvoices = todayInvoices.filter(

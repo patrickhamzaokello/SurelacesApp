@@ -14,11 +14,6 @@ const isValidUUID = (str: string): boolean => {
 
 // Helper to clean/validate invoice before syncing
 const validateInvoiceForSync = (invoice: Invoice): boolean => {
-  // Check salesperson is UUID
-  if (!isValidUUID(invoice.salesperson)) {
-    console.error(`Invalid salesperson UUID: ${invoice.salesperson}`);
-    return false;
-  }
   
   // Check all product IDs are UUIDs
   for (const item of invoice.items) {
@@ -255,6 +250,7 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
         }
       }
     } catch (error) {
+      await AsyncStorage.removeItem('local_invoices');
       console.error('Failed to load local invoices:', error);
     }
   },
