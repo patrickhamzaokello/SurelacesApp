@@ -51,10 +51,7 @@ export const SalespersonInvoicesScreen = () => {
           <InvoiceCard
             invoice={item}
             onPress={() => {
-              router.push({
-                pathname: '/(salesperson)/invoice-details',
-                params: { invoiceId: item.id }
-              });
+              router.push(`/(salesperson)/invoices/${item.id}`);
             }}
           />
         )}

@@ -1,5 +1,5 @@
 // app/(salesperson)/_layout.tsx
-import { Tabs, Redirect } from 'expo-router';
+import { Tabs, Redirect, Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/store/authStore';
 import { CartIconWithBadge } from '@/components/CartIconWithBadge';

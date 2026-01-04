@@ -19,11 +19,11 @@ import { Invoice, InvoiceItem } from '@/types';
 
 export const InvoiceDetailsScreen = () => {
   const router = useRouter();
-  const { invoiceId } = useLocalSearchParams<{ invoiceId: string }>();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const { getInvoiceById } = useInvoicesStore();
   const viewShotRef = useRef<any>(null);
 
-  const invoice = getInvoiceById(invoiceId!);
+  const invoice = getInvoiceById(id!);
 
   if (!invoice) {
     return (
