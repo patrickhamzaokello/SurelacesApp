@@ -17,6 +17,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { Product } from '../../types';
 import { format } from 'date-fns';
 import { theme } from '../../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const OwnerProductsScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,6 +63,7 @@ export const OwnerProductsScreen = () => {
 
   return (
     <View style={styles.container}>
+       <SafeAreaView />
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Products</Text>

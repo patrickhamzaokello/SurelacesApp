@@ -7,6 +7,7 @@ import { SyncIndicator } from '../../components/SyncIndicator';
 import { useAuth } from '../../hooks/useAuth';
 import { useSync } from '../../hooks/useSync';
 import { theme } from '../../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const ProfileScreen = () => {
   const { user, logout, isSalesperson, isOwner } = useAuth();
@@ -67,6 +68,7 @@ export const ProfileScreen = () => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+       <SafeAreaView />
       {/* Header Section */}
       <View style={styles.header}>
         <View style={styles.profileInfo}>

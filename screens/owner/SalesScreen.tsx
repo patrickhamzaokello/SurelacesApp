@@ -14,6 +14,7 @@ import { EmptyState } from '../../components/EmptyState';
 import { InvoiceCard } from '../../components/InvoiceCard';
 import { useInvoicesStore } from '../../store/invoicesStore';
 import { theme } from '../../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type FilterType = 'all' | 'today';
 
@@ -41,6 +42,7 @@ export const OwnerSalesScreen = () => {
 
   return (
     <View style={styles.container}>
+       <SafeAreaView />
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Sales</Text>

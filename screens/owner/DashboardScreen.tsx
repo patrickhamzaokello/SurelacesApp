@@ -6,6 +6,7 @@ import { useSync } from '../../hooks/useSync';
 import { SyncIndicator } from '../../components/SyncIndicator';
 import { useInvoicesStore } from '../../store/invoicesStore';
 import { theme } from '../../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -27,6 +28,7 @@ export const OwnerDashboardScreen = () => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <SafeAreaView />
       {/* Header Section */}
       <View style={styles.header}>
         <View>
@@ -49,7 +51,7 @@ export const OwnerDashboardScreen = () => {
         )}
 
         {/* Key Metrics - Full Width Cards */}
-        <View style={styles.metricsSection}>
+        <View style={[styles.metricsSection, { marginTop: theme.spacing.md }]}>
           <Text style={styles.sectionTitle}>Today's Performance</Text>
           
           {/* Primary Metric */}

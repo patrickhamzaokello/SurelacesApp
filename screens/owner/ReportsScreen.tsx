@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useInvoicesStore } from '../../store/invoicesStore';
 import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
 import { theme } from '../../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const OwnerReportsScreen = () => {
   const { invoices } = useInvoicesStore();
@@ -79,6 +80,8 @@ export const OwnerReportsScreen = () => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+
+       <SafeAreaView />
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Reports</Text>

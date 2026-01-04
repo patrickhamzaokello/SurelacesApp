@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { useInvoicesStore } from '@/store/invoicesStore';
 import { Invoice, InvoiceItem } from '@/types';
 import { theme } from '@/constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const InvoiceDetailsScreen = () => {
   const router = useRouter();
@@ -93,6 +94,7 @@ export const InvoiceDetailsScreen = () => {
 
   return (
     <View style={styles.container}>
+       <SafeAreaView />
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>

@@ -1,6 +1,6 @@
 // app/(owner)/_layout.tsx
 import { Tabs, Redirect } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { Entypo, Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/store/authStore';
 import { theme } from '@/constants/theme';
 
@@ -44,10 +44,10 @@ export default function OwnerLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: 'Dashboard',
+          title: 'Home',
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? 'stats-chart' : 'stats-chart-outline'}
+              name={focused ? 'grid' : 'grid-outline'}
               size={size}
               color={color}
             />
@@ -73,7 +73,7 @@ export default function OwnerLayout() {
           title: 'Products',
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? 'cube' : 'cube-outline'}
+              name={focused ? 'diamond' : 'diamond-outline'}
               size={size}
               color={color}
             />
@@ -85,8 +85,8 @@ export default function OwnerLayout() {
         options={{
           title: 'Reports',
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'bar-chart' : 'bar-chart-outline'}
+            <Ionicons 
+              name={focused ? 'albums' : 'albums-outline'}
               size={size}
               color={color}
             />

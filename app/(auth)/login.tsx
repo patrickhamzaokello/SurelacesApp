@@ -1,4 +1,5 @@
 // app/(auth)/login.tsx
+import { theme } from '@/constants/theme';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -18,7 +19,7 @@ export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading, error, clearError, user } = useAuthStore();
+  const { login, isLoading, error, clearError } = useAuthStore();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -28,14 +29,13 @@ export default function LoginScreen() {
   
     try {
       const loggedInUser = await login(email, password);      
-      // Navigate based on role using the returned user
       if (loggedInUser?.role === 'salesperson') {
         router.replace('/(salesperson)/home');
       } else {
         router.replace('/(owner)/dashboard');
       }
     } catch (err) {
-      // Error is handled by the store
+      // Error handled by store
     }
   };
 
@@ -46,15 +46,16 @@ export default function LoginScreen() {
     >
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.logo}>📱</Text>
-          <Text style={styles.title}>Sales App</Text>
-          <Text style={styles.subtitle}>Sign in to continue</Text>
+          <Text style={styles.logo}>SP</Text>
+          <Text style={styles.title}>Surelaces Mobile POS</Text>
+          <Text style={styles.subtitle}>Welcome, Sign in to continue</Text>
         </View>
 
         <View style={styles.form}>
           <TextInput
             style={styles.input}
             placeholder="Email"
+            placeholderTextColor={theme.colors.gray500}
             value={email}
             onChangeText={(text) => {
               setEmail(text);
@@ -68,6 +69,7 @@ export default function LoginScreen() {
           <TextInput
             style={styles.input}
             placeholder="Password"
+            placeholderTextColor={theme.colors.gray500}
             value={password}
             onChangeText={(text) => {
               setPassword(text);
@@ -90,17 +92,18 @@ export default function LoginScreen() {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={theme.colors.white} />
             ) : (
               <Text style={styles.buttonText}>Sign In</Text>
             )}
           </TouchableOpacity>
         </View>
 
+        {/* Optional: Remove in production */}
         <View style={styles.demoInfo}>
-          <Text style={styles.demoTitle}>Demo Credentials</Text>
-          <Text style={styles.demoText}>Salesperson: sales@demo.com / password</Text>
-          <Text style={styles.demoText}>Owner: owner@demo.com / password</Text>
+          <Text style={styles.demoTitle}>Terms and Agreements</Text>
+          <Text style={styles.demoText}>Contact: info@surelaces.com</Text>
+          <Text style={styles.demoText}>Developer: kakebe Technologies</Text>
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -110,81 +113,84 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
   },
   content: {
     flex: 1,
-    padding: 24,
+    paddingHorizontal: theme.spacing.lg,
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
+    marginBottom: theme.spacing.xxl,
   },
   logo: {
-    fontSize: 64,
-    marginBottom: 16,
+    fontSize: 80,  // Slightly larger for impact
+    marginBottom: theme.spacing.md,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: theme.typography.sizes.xxxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.gray900,
+    marginBottom: theme.spacing.sm,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.gray600,
   },
   form: {
-    marginBottom: 24,
+    marginBottom: theme.spacing.xxl,
   },
   input: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    fontSize: 16,
-    marginBottom: 16,
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    fontSize: theme.typography.sizes.md,
+    marginBottom: theme.spacing.md,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: theme.colors.border,
   },
   errorContainer: {
-    backgroundColor: '#FFEBEE',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
+    backgroundColor: '#FEF2F2',  // Light red tint
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.colors.error + '33',  // Transparentized error
   },
   errorText: {
-    color: '#C62828',
-    fontSize: 14,
+    color: theme.colors.error,
+    fontSize: theme.typography.sizes.sm,
   },
   button: {
-    backgroundColor: '#2196F3',
-    padding: 18,
-    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
     alignItems: 'center',
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.7,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
+    color: theme.colors.white,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold,
   },
   demoInfo: {
-    backgroundColor: '#E3F2FD',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: theme.colors.gray100,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
   },
   demoTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1976D2',
-    marginBottom: 8,
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.gray700,
+    marginBottom: theme.spacing.sm,
+    textAlign: 'center',
   },
   demoText: {
-    fontSize: 13,
-    color: '#1976D2',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray600,
+    textAlign: 'center',
   },
 });
