@@ -132,6 +132,9 @@ export const OwnerReportsScreen = () => {
                 <Text style={styles.listItemName} numberOfLines={2}>
                   {product.name}
                 </Text>
+                <Text style={styles.listItemName} numberOfLines={2}>
+                  {product.name}
+                </Text>
               </View>
               <View style={styles.listItemRight}>
                 <Text style={styles.listItemValue}>UGX {product.revenue.toFixed(0)}</Text>

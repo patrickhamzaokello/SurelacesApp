@@ -10,13 +10,17 @@ import { InvoiceCard } from '@/components/InvoiceCard';
 import { EmptyState } from '@/components/EmptyState';
 import { CartScreen } from '@/screens/salesperson/CartScreen';
 import { ProductsScreen } from '@/screens/salesperson/ProductsScreen';
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 export default function ProductsScreenMain() {
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+       <StatusBar style="dark" />
+      
       <ProductsScreen />
-    </View>
+    </SafeAreaView>
   );
 }
 

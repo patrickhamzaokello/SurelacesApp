@@ -24,13 +24,11 @@ export const useSyncStore = create<SyncStoreState>((set, get) => ({
 
   startSync: async () => {
     if (get().isSyncing) {
-      console.log('Sync already in progress, skipping...');
       return;
     }
 
     try {
       set({ isSyncing: true, status: 'syncing' });
-      console.log('Starting sync...');
 
       const invoicesStore = useInvoicesStore.getState();
       const productsStore = useProductsStore.getState();
@@ -38,30 +36,23 @@ export const useSyncStore = create<SyncStoreState>((set, get) => ({
       // 1. First, sync pending invoices
       try {
         await invoicesStore.syncPendingInvoices();
-        console.log('Pending invoices synced');
       } catch (error) {
-        console.error('Failed to sync pending invoices:', error);
         // Don't throw - continue with other sync operations
       }
 
       // 2. Fetch latest products
       try {
         await productsStore.fetchProducts();
-        console.log('Products fetched');
       } catch (error) {
-        console.error('Failed to fetch products:', error);
       }
 
       // 3. Fetch latest invoices (this will merge with local pending ones)
       try {
         await invoicesStore.fetchInvoices();
-        console.log('Invoices fetched');
       } catch (error) {
-        console.error('Failed to fetch invoices:', error);
       }
 
       const pendingCount = invoicesStore.getPendingInvoices().length;
-      console.log(`Sync complete. ${pendingCount} invoices still pending.`);
 
       set({
         lastSyncTime: new Date().toISOString(),
@@ -70,7 +61,6 @@ export const useSyncStore = create<SyncStoreState>((set, get) => ({
         status: pendingCount > 0 ? 'offline' : 'online', // Show offline if there are pending items
       });
     } catch (error) {
-      console.error('Sync failed:', error);
       set({
         isSyncing: false,
         status: 'offline',
@@ -87,7 +77,6 @@ export const useSyncStore = create<SyncStoreState>((set, get) => ({
       const isConnected = state.isConnected && state.isInternetReachable;
       const newStatus = isConnected ? 'online' : 'offline';
       
-      console.log(`Network status changed: ${newStatus}`);
       set({ status: newStatus });
 
       // Auto-sync when coming back online and there are pending invoices
@@ -96,7 +85,6 @@ export const useSyncStore = create<SyncStoreState>((set, get) => ({
         const pendingCount = invoicesStore.getPendingInvoices().length;
         
         if (pendingCount > 0) {
-          console.log(`Network restored. Syncing ${pendingCount} pending invoices...`);
           // Delay sync slightly to ensure connection is stable
           setTimeout(() => {
             get().startSync();

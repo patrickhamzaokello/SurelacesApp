@@ -9,13 +9,16 @@ import { SyncIndicator } from '@/components/SyncIndicator';
 import { InvoiceCard } from '@/components/InvoiceCard';
 import { EmptyState } from '@/components/EmptyState';
 import { CartScreen } from '@/screens/salesperson/CartScreen';
+import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 export default function CartScreenMain() {
 
   return (
-    <View style={styles.container}>
+      <SafeAreaView style={styles.container}>
+         <StatusBar style="dark" />
       <CartScreen />
-    </View>
+    </SafeAreaView>
   );
 }
 

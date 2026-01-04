@@ -12,12 +12,16 @@ import { CartScreen } from '@/screens/salesperson/CartScreen';
 import { ProfileScreen } from '@/screens/shared/ProfileScreen';
 import { OwnerSalesScreen } from '@/screens/owner/SalesScreen';
 import { OwnerReportsScreen } from '@/screens/owner/ReportsScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from "expo-status-bar";
+
 
 export default function ReportsMain() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+       <StatusBar style="dark" />
       <OwnerReportsScreen />
-    </View>
+    </SafeAreaView>
   );
 }
 

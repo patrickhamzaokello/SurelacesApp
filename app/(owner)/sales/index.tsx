@@ -11,10 +11,13 @@ import { EmptyState } from '@/components/EmptyState';
 import { CartScreen } from '@/screens/salesperson/CartScreen';
 import { ProfileScreen } from '@/screens/shared/ProfileScreen';
 import { OwnerSalesScreen } from '@/screens/owner/SalesScreen';
+import { StatusBar } from "expo-status-bar";
+
 
 export default function SalesMain() {
   return (
     <View style={styles.container}>
+       <StatusBar style="dark" />
       <OwnerSalesScreen />
     </View>
   );

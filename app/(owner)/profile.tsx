@@ -10,12 +10,16 @@ import { InvoiceCard } from '@/components/InvoiceCard';
 import { EmptyState } from '@/components/EmptyState';
 import { CartScreen } from '@/screens/salesperson/CartScreen';
 import { ProfileScreen } from '@/screens/shared/ProfileScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from "expo-status-bar";
+
 
 export default function OwnerProfileScreen() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+       <StatusBar style="dark" />
       <ProfileScreen />
-    </View>
+    </SafeAreaView>
   );
 }
 

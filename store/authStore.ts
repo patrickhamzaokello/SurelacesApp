@@ -68,7 +68,6 @@ login: async (email: string, password: string) => {
 
     let expiresAt = decodeJwtExp(accessToken);
     if (!expiresAt) {
-      console.warn('Could not decode JWT exp, using fallback expiration (24 hours per API docs)');
       expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours as per API docs
     }
 
@@ -143,7 +142,6 @@ login: async (email: string, password: string) => {
         });
       }
     } catch (error) {
-      console.error('Failed to load stored auth:', error);
       await secureStorage.clearAll();
       set({
         user: null,
