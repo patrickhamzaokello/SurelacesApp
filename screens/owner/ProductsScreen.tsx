@@ -42,7 +42,7 @@ export const OwnerProductsScreen = () => {
   const handleProductPress = (product: Product) => {
     Alert.alert(
       product.name,
-      `Code: ${product.code}\nPrice: $${product.price}${
+      `Code: ${product.code}\nPrice: ${product.price}${
         product.stock !== undefined ? `\nStock: ${product.stock}` : ''
       }${product.category ? `\nCategory: ${product.category}` : ''}`,
       [{ text: 'OK' }]

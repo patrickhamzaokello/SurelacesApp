@@ -42,7 +42,7 @@ export const OwnerDashboardScreen = () => {
       <View style={styles.statsGrid}>
         <View style={styles.statCard}>
           <Text style={styles.statIcon}>💰</Text>
-          <Text style={styles.statValue}>${stats.totalSales}</Text>
+          <Text style={styles.statValue}>UGX {stats.totalSales}</Text>
           <Text style={styles.statLabel}>Total Sales Today</Text>
         </View>
 
@@ -73,7 +73,7 @@ export const OwnerDashboardScreen = () => {
           <View style={styles.overviewRow}>
             <Text style={styles.overviewLabel}>Average Invoice Value</Text>
             <Text style={styles.overviewValue}>
-              ${stats.invoiceCount > 0 ? (stats.totalSales / stats.invoiceCount).toFixed(2) : '0.00'}
+            UGX {stats.invoiceCount > 0 ? (stats.totalSales / stats.invoiceCount).toFixed(0) : '0.00'}
             </Text>
           </View>
           <View style={styles.overviewRow}>

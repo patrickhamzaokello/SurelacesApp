@@ -34,7 +34,7 @@ export const SalespersonHomeScreen = () => {
 
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <Text style={styles.statValue}>${stats.totalSales.toFixed(2)}</Text>
+          <Text style={styles.statValue}>{stats.totalSales.toFixed(2)}</Text>
           <Text style={styles.statLabel}>Total Sales Today</Text>
         </View>
         <View style={styles.statCard}>

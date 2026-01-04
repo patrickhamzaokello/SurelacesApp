@@ -83,19 +83,19 @@ export const OwnerReportsScreen = () => {
         
         <View style={styles.summaryCard}>
           <Text style={styles.summaryPeriod}>Today</Text>
-          <Text style={styles.summaryAmount}>${reports.dailySales.toFixed(2)}</Text>
+          <Text style={styles.summaryAmount}>UGX {reports.dailySales.toFixed(0)}</Text>
           <Text style={styles.summaryCount}>{reports.dailyCount} transactions</Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryPeriod}>This Week</Text>
-          <Text style={styles.summaryAmount}>${reports.weeklySales.toFixed(2)}</Text>
+          <Text style={styles.summaryAmount}>UGX {reports.weeklySales.toFixed(0)}</Text>
           <Text style={styles.summaryCount}>{reports.weeklyCount} transactions</Text>
         </View>
 
         <View style={styles.summaryCard}>
           <Text style={styles.summaryPeriod}>This Month</Text>
-          <Text style={styles.summaryAmount}>${reports.monthlySales.toFixed(2)}</Text>
+          <Text style={styles.summaryAmount}>UGX {reports.monthlySales.toFixed(0)}</Text>
           <Text style={styles.summaryCount}>{reports.monthlyCount} transactions</Text>
         </View>
       </View>
@@ -112,7 +112,7 @@ export const OwnerReportsScreen = () => {
                 <Text style={styles.listItemName}>{person.name}</Text>
               </View>
               <View style={styles.listItemRight}>
-                <Text style={styles.listItemValue}>${person.total.toFixed(2)}</Text>
+                <Text style={styles.listItemValue}>UGX {person.total.toFixed(0)}</Text>
                 <Text style={styles.listItemCount}>{person.count} sales</Text>
               </View>
             </View>
@@ -134,7 +134,7 @@ export const OwnerReportsScreen = () => {
                 </Text>
               </View>
               <View style={styles.listItemRight}>
-                <Text style={styles.listItemValue}>${product.revenue.toFixed(2)}</Text>
+                <Text style={styles.listItemValue}>UGX {product.revenue.toFixed(0)}</Text>
                 <Text style={styles.listItemCount}>{product.quantity} sold</Text>
               </View>
             </View>

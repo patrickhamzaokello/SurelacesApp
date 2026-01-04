@@ -38,7 +38,7 @@ export const ProductsScreen = () => {
   const handleProductLongPress = (product: Product) => {
     Alert.alert(
       product.name,
-      `Code: ${product.code}\nPrice: $${parseFloat(product.price).toFixed(2)}${
+      `Code: ${product.code}\nPrice: ${parseFloat(product.price).toFixed(2)}${
         product.stock !== undefined ? `\nStock: ${product.stock}` : ''
       }${product.category_name ? `\nCategory: ${product.category_name}` : ''}`,
       [{ text: 'OK' }]

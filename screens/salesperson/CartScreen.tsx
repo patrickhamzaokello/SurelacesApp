@@ -86,7 +86,7 @@ export const CartScreen = () => {
               </Text>
               <Text style={styles.itemCode}>{item.product.code}</Text>
               <Text style={styles.itemPrice}>
-                ${parseFloat(item.product.price).toFixed(2)} each
+                {parseFloat(item.product.price).toFixed(0)} each
               </Text>
             </View>
             <View style={styles.quantityContainer}>
@@ -106,7 +106,7 @@ export const CartScreen = () => {
             </View>
             <View style={styles.itemTotal}>
               <Text style={styles.itemTotalText}>
-                ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
+                {(parseFloat(item.product.price) * item.quantity).toFixed(0)}
               </Text>
               <TouchableOpacity
                 style={styles.removeButton}
@@ -124,15 +124,15 @@ export const CartScreen = () => {
         <View style={styles.totals}>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Subtotal</Text>
-            <Text style={styles.totalValue}>${getSubtotal().toFixed(2)}</Text>
+            <Text style={styles.totalValue}>UGX {getSubtotal().toFixed(0)}</Text>
           </View>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Tax (10%)</Text>
-            <Text style={styles.totalValue}>${getTax(taxRate).toFixed(2)}</Text>
+            <Text style={styles.totalValue}>UGX {getTax(taxRate).toFixed(0)}</Text>
           </View>
           <View style={[styles.totalRow, styles.grandTotal]}>
             <Text style={styles.grandTotalLabel}>Total</Text>
-            <Text style={styles.grandTotalValue}>${getTotal(taxRate).toFixed(2)}</Text>
+            <Text style={styles.grandTotalValue}>UGX {getTotal(taxRate).toFixed(0)}</Text>
           </View>
         </View>
 
