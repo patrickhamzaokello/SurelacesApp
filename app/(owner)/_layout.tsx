@@ -2,6 +2,7 @@
 import { Tabs, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/store/authStore';
+import { theme } from '@/constants/theme';
 
 export default function OwnerLayout() {
   const { user, isAuthenticated } = useAuthStore();
@@ -13,14 +14,29 @@ export default function OwnerLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2196F3',
-        tabBarInactiveTintColor: '#666',
-        headerStyle: {
-          backgroundColor: '#2196F3',
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: theme.colors.gray400,
+        tabBarStyle: {
+          backgroundColor: theme.colors.white,
+          borderTopWidth: 1,
+          borderTopColor: theme.colors.border,
+          paddingBottom: 8,
+          paddingTop: 8,
         },
-        headerTintColor: '#fff',
+        tabBarLabelStyle: {
+          fontSize: theme.typography.sizes.xs,
+          fontWeight: theme.typography.weights.medium,
+          marginTop: 4,
+        },
+        headerStyle: {
+          backgroundColor: theme.colors.white,
+          borderBottomWidth: 1,
+          borderBottomColor: theme.colors.border,
+        },
+        headerTintColor: theme.colors.black,
         headerTitleStyle: {
-          fontWeight: '700',
+          fontWeight: theme.typography.weights.semibold,
+          fontSize: theme.typography.sizes.lg,
         },
         headerShown: false
       }}

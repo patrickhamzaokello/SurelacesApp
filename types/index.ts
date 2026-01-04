@@ -21,6 +21,8 @@ export interface AuthTokens {
   access: string;
   refresh: string;
   expiresAt?: number;
+  loginTimestamp: number; // When user first logged in
+  lastRefresh?: number; // When token was last refreshed
 }
 
 export interface Store {

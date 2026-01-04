@@ -98,9 +98,13 @@ class ApiClient {
 
             const { access, refresh } = response.data;
 
+            const existingTokens = await secureStorage.getTokens();
             await secureStorage.saveTokens({
               access,
               refresh,
+              expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+              loginTimestamp: existingTokens?.loginTimestamp || Date.now(),
+              lastRefresh: Date.now(),
             });
 
             // Process queued requests
@@ -111,9 +115,20 @@ class ApiClient {
             return this.client(originalRequest);
           } catch (refreshError) {
             this.processQueue(refreshError, null);
-            await secureStorage.clearAll();
             
-            // Trigger logout in the app
+            // Check if 7-day session is still valid before clearing
+            const existingTokens = await secureStorage.getTokens();
+            if (existingTokens?.loginTimestamp) {
+              const sevenDays = 7 * 24 * 60 * 60 * 1000;
+              const isWithinSevenDays = Date.now() - existingTokens.loginTimestamp < sevenDays;
+              
+              if (!isWithinSevenDays) {
+                await secureStorage.clearAll();
+              }
+            } else {
+              await secureStorage.clearAll();
+            }
+            
             return Promise.reject(refreshError);
           } finally {
             this.isRefreshing = false;

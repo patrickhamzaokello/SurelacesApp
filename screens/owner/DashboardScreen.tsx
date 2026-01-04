@@ -1,10 +1,13 @@
 // src/screens/owner/DashboardScreen.tsx
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Dimensions } from 'react-native';
 import { useTodayStats } from '../../hooks/useTodayStats';
 import { useSync } from '../../hooks/useSync';
 import { SyncIndicator } from '../../components/SyncIndicator';
 import { useInvoicesStore } from '../../store/invoicesStore';
+import { theme } from '../../constants/theme';
+
+const { width } = Dimensions.get('window');
 
 export const OwnerDashboardScreen = () => {
   const stats = useTodayStats(); // No filter, shows all sales
@@ -23,62 +26,90 @@ export const OwnerDashboardScreen = () => {
   ).size;
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header Section */}
       <View style={styles.header}>
-        <Text style={styles.title}>Dashboard</Text>
-        <Text style={styles.subtitle}>{stats.date}</Text>
-      </View>
-
-      <SyncIndicator />
-
-      {status !== 'online' && (
-        <View style={styles.warningCard}>
-          <Text style={styles.warningText}>
-            ⚠️ Data may be incomplete - sync to see latest
-          </Text>
-        </View>
-      )}
-
-      <View style={styles.statsGrid}>
-        <View style={styles.statCard}>
-          <Text style={styles.statIcon}>💰</Text>
-          <Text style={styles.statValue}>UGX {stats.totalSales}</Text>
-          <Text style={styles.statLabel}>Total Sales Today</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <Text style={styles.statIcon}>📋</Text>
-          <Text style={styles.statValue}>{stats.totalSales}</Text>
-          <Text style={styles.statLabel}>Invoices Today</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <Text style={styles.statIcon}>⭐</Text>
-          <Text style={styles.statValue} numberOfLines={1}>
-            {stats.topProduct || 'N/A'}
-          </Text>
-          <Text style={styles.statLabel}>Top Product</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <Text style={styles.statIcon}>👥</Text>
-          <Text style={styles.statValue}>{activeSalespeople}</Text>
-          <Text style={styles.statLabel}>Active Salespeople</Text>
+        <View>
+          <Text style={styles.title}>Dashboard</Text>
+          <Text style={styles.subtitle}>{stats.date}</Text>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Quick Overview</Text>
-        <View style={styles.overviewCard}>
-          <View style={styles.overviewRow}>
-            <Text style={styles.overviewLabel}>Average Invoice Value</Text>
-            <Text style={styles.overviewValue}>
-            UGX {stats.invoiceCount > 0 ? (stats.totalSales / stats.invoiceCount).toFixed(0) : '0.00'}
+      <View style={styles.content}>
+        {/* Sync Status */}
+        <SyncIndicator />
+
+        {/* Warning Card */}
+        {status !== 'online' && (
+          <View style={styles.warningCard}>
+            <Text style={styles.warningText}>
+              Data may be incomplete - sync to see latest
             </Text>
           </View>
-          <View style={styles.overviewRow}>
-            <Text style={styles.overviewLabel}>Total Transactions</Text>
-            <Text style={styles.overviewValue}>{stats.invoiceCount}</Text>
+        )}
+
+        {/* Key Metrics - Full Width Cards */}
+        <View style={styles.metricsSection}>
+          <Text style={styles.sectionTitle}>Today's Performance</Text>
+          
+          {/* Primary Metric */}
+          <View style={styles.primaryMetricCard}>
+            <Text style={styles.primaryMetricLabel}>Total Sales Today</Text>
+            <Text style={styles.primaryMetricValue}>UGX {stats.totalSales.toFixed(0)}</Text>
+            <Text style={styles.primaryMetricSubtext}>{stats.invoiceCount} transactions completed</Text>
+          </View>
+
+          {/* Secondary Metrics Grid */}
+          <View style={styles.secondaryMetricsGrid}>
+            <View style={styles.secondaryMetricCard}>
+              <Text style={styles.secondaryMetricValue}>{stats.invoiceCount}</Text>
+              <Text style={styles.secondaryMetricLabel}>Invoices</Text>
+            </View>
+
+            <View style={styles.secondaryMetricCard}>
+              <Text style={styles.secondaryMetricValue}>{activeSalespeople}</Text>
+              <Text style={styles.secondaryMetricLabel}>Active Staff</Text>
+            </View>
+
+            <View style={styles.secondaryMetricCard}>
+              <Text style={styles.secondaryMetricValue}>
+                {stats.invoiceCount > 0 ? (stats.totalSales / stats.invoiceCount).toFixed(0) : '0'}
+              </Text>
+              <Text style={styles.secondaryMetricLabel}>Avg. Invoice (Ugx)</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Top Product - Full Width */}
+        <View style={styles.topProductSection}>
+          <Text style={styles.sectionTitle}>Top Selling Product</Text>
+          <View style={styles.topProductCard}>
+            {stats.topProduct ? (
+              <>
+                <Text style={styles.topProductName}>{stats.topProduct}</Text>
+                <Text style={styles.topProductSubtext}>Most sold item today</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.topProductName}>No sales data</Text>
+                <Text style={styles.topProductSubtext}>Start making sales to see top products</Text>
+              </>
+            )}
+          </View>
+        </View>
+
+        {/* Quick Stats */}
+        <View style={styles.quickStatsSection}>
+          <Text style={styles.sectionTitle}>Quick Stats</Text>
+          <View style={styles.quickStatsGrid}>
+            <View style={styles.quickStatItem}>
+              <Text style={styles.quickStatLabel}>Revenue Target</Text>
+              <Text style={styles.quickStatValue}>Coming Soon</Text>
+            </View>
+            <View style={styles.quickStatItem}>
+              <Text style={styles.quickStatLabel}>Monthly Growth</Text>
+              <Text style={styles.quickStatValue}>Coming Soon</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -89,97 +120,158 @@ export const OwnerDashboardScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
   },
   header: {
-    padding: 20,
-    backgroundColor: '#2196F3',
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.xxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
   },
   subtitle: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray500,
+    fontWeight: theme.typography.weights.medium,
+  },
+  content: {
+    padding: theme.spacing.md,
   },
   warningCard: {
-    backgroundColor: '#FFF3CD',
-    padding: 12,
-    margin: 16,
-    marginTop: 0,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF9800',
+    backgroundColor: theme.colors.gray50,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.error,
+    marginBottom: theme.spacing.lg,
   },
   warningText: {
-    fontSize: 14,
-    color: '#856404',
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.error,
+    fontWeight: theme.typography.weights.medium,
   },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 16,
-    gap: 12,
-  },
-  statCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 20,
-    width: '48%',
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  statIcon: {
-    fontSize: 32,
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#2196F3',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  statLabel: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-  },
-  section: {
-    padding: 16,
+  metricsSection: {
+    marginBottom: theme.spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 12,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.md,
   },
-  overviewCard: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
+  primaryMetricCard: {
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.xl,
+    marginBottom: theme.spacing.md,
+    alignItems: 'center',
   },
-  overviewRow: {
+  primaryMetricLabel: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.white,
+    opacity: 0.9,
+    marginBottom: theme.spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontWeight: theme.typography.weights.medium,
+  },
+  primaryMetricValue: {
+    fontSize: theme.typography.sizes.xxxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.white,
+    marginBottom: theme.spacing.xs,
+  },
+  primaryMetricSubtext: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.white,
+    opacity: 0.8,
+  },
+  secondaryMetricsGrid: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    gap: theme.spacing.sm,
   },
-  overviewLabel: {
-    fontSize: 16,
-    color: '#666',
+  secondaryMetricCard: {
+    flex: 1,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
-  overviewValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+  secondaryMetricValue: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
+    textAlign: 'center',
+  },
+  secondaryMetricLabel: {
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
+    textAlign: 'center',
+    fontWeight: theme.typography.weights.medium,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  topProductSection: {
+    marginBottom: theme.spacing.xl,
+  },
+  topProductCard: {
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.xl,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    alignItems: 'center',
+  },
+  topProductName: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    textAlign: 'center',
+    marginBottom: theme.spacing.xs,
+    lineHeight: 24,
+  },
+  topProductSubtext: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray500,
+    textAlign: 'center',
+  },
+  quickStatsSection: {
+    marginBottom: theme.spacing.xl,
+  },
+  quickStatsGrid: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+  },
+  quickStatItem: {
+    flex: 1,
+    backgroundColor: theme.colors.gray50,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  quickStatLabel: {
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
+    textAlign: 'center',
+    marginBottom: theme.spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontWeight: theme.typography.weights.medium,
+  },
+  quickStatValue: {
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.gray600,
+    textAlign: 'center',
   },
 });

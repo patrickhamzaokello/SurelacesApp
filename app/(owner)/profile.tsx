@@ -16,10 +16,10 @@ import { StatusBar } from "expo-status-bar";
 
 export default function OwnerProfileScreen() {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
        <StatusBar style="dark" />
       <ProfileScreen />
-    </SafeAreaView>
+    </View>
   );
 }
 

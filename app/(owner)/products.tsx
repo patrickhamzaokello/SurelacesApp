@@ -18,10 +18,10 @@ import { StatusBar } from 'expo-status-bar';
 
 export default function ProductsMain() {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
        <StatusBar style="dark" />
       <OwnerProductsScreen />
-    </SafeAreaView>
+    </View>
   );
 }
 

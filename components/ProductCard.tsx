@@ -2,6 +2,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Product } from '../types';
+import { theme } from '../constants/theme';
 
 interface ProductCardProps {
   product: Product;
@@ -40,45 +41,43 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   content: {
-    padding: 16,
+    padding: theme.spacing.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   info: {
     flex: 1,
-    marginRight: 12,
+    marginRight: theme.spacing.md,
   },
   name: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
   },
   code: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
+    fontFamily: 'monospace',
   },
   priceContainer: {
     alignItems: 'flex-end',
   },
   price: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2196F3',
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
   },
   stock: {
-    fontSize: 12,
-    color: '#666',
-    marginTop: 4,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray600,
+    marginTop: theme.spacing.xs,
   },
 });

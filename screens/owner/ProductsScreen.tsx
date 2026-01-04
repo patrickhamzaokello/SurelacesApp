@@ -10,11 +10,13 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useProductsStore } from '../../store/productsStore';
 import { ProductCard } from '../../components/ProductCard';
 import { EmptyState } from '../../components/EmptyState';
 import { Product } from '../../types';
 import { format } from 'date-fns';
+import { theme } from '../../constants/theme';
 
 export const OwnerProductsScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -42,9 +44,9 @@ export const OwnerProductsScreen = () => {
   const handleProductPress = (product: Product) => {
     Alert.alert(
       product.name,
-      `Code: ${product.code}\nPrice: ${product.price}${
+      `Code: ${product.code}\nPrice: UGX ${parseFloat(product.price).toFixed(0)}${
         product.stock !== undefined ? `\nStock: ${product.stock}` : ''
-      }${product.category ? `\nCategory: ${product.category}` : ''}`,
+      }${product.category_name ? `\nCategory: ${product.category_name}` : ''}`,
       [{ text: 'OK' }]
     );
   };
@@ -52,7 +54,7 @@ export const OwnerProductsScreen = () => {
   if (isLoading && products.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
         <Text style={styles.loadingText}>Loading products...</Text>
       </View>
     );
@@ -60,36 +62,61 @@ export const OwnerProductsScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <View style={styles.searchContainer}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Products</Text>
+        <Text style={styles.subtitle}>Inventory and product management</Text>
+      </View>
+
+      {/* Search and Actions */}
+      <View style={styles.actionsContainer}>
+        <View style={styles.searchInputContainer}>
+          <Ionicons name="search" size={20} color={theme.colors.gray400} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search products..."
+            placeholderTextColor={theme.colors.gray400}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoCapitalize="none"
             autoCorrect={false}
           />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity 
+              onPress={() => setSearchQuery('')}
+              style={styles.clearButton}
+            >
+              <Ionicons name="close-circle" size={20} color={theme.colors.gray400} />
+            </TouchableOpacity>
+          )}
         </View>
+        
         {lastUpdated && (
           <Text style={styles.lastUpdated}>
             Last updated: {format(new Date(lastUpdated), 'h:mm a')}
           </Text>
         )}
+        
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={handleRefresh}
           disabled={isLoading}
         >
+          <Ionicons 
+            name={isLoading ? "refresh" : "refresh-outline"} 
+            size={18} 
+            color={theme.colors.white} 
+            style={styles.refreshIcon}
+          />
           <Text style={styles.refreshButtonText}>
-            {isLoading ? 'Updating...' : '🔄 Update Products'}
+            {isLoading ? 'Updating...' : 'Update Products'}
           </Text>
         </TouchableOpacity>
       </View>
 
+      {/* Products List */}
       {filteredProducts.length === 0 ? (
         <EmptyState
-          icon="📦"
           title={searchQuery ? 'No products found' : 'No products available'}
           message={
             searchQuery
@@ -108,6 +135,7 @@ export const OwnerProductsScreen = () => {
             />
           )}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
         />
       )}
     </View>
@@ -117,7 +145,7 @@ export const OwnerProductsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
   },
   centerContainer: {
     flex: 1,
@@ -125,42 +153,79 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#666',
+    marginTop: theme.spacing.md,
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.gray500,
+    fontWeight: theme.typography.weights.medium,
   },
-  headerContainer: {
-    backgroundColor: '#fff',
-    padding: 16,
+  header: {
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.colors.border,
   },
-  searchContainer: {
-    marginBottom: 8,
+  title: {
+    fontSize: theme.typography.sizes.xxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
+  },
+  subtitle: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray500,
+    fontWeight: theme.typography.weights.medium,
+  },
+  actionsContainer: {
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.gray50,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    paddingHorizontal: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+  },
+  searchIcon: {
+    marginRight: theme.spacing.sm,
   },
   searchInput: {
-    backgroundColor: '#f5f5f5',
-    padding: 12,
-    borderRadius: 8,
-    fontSize: 16,
+    flex: 1,
+    padding: theme.spacing.md,
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.black,
+  },
+  clearButton: {
+    marginLeft: theme.spacing.sm,
   },
   lastUpdated: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 8,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
+    marginBottom: theme.spacing.sm,
+    textAlign: 'center',
   },
   refreshButton: {
-    backgroundColor: '#2196F3',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  refreshIcon: {
+    marginRight: theme.spacing.sm,
   },
   refreshButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.white,
   },
   listContent: {
-    padding: 16,
+    padding: theme.spacing.md,
   },
 });

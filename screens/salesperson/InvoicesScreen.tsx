@@ -1,11 +1,12 @@
 // src/screens/salesperson/InvoicesScreen.tsx
 import React, { useEffect } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View, Text } from 'react-native';
 import { useRouter } from 'expo-router';
 import { EmptyState } from '../../components/EmptyState';
 import { InvoiceCard } from '../../components/InvoiceCard';
 import { useAuth } from '../../hooks/useAuth';
 import { useInvoicesStore } from '../../store/invoicesStore';
+import { theme } from '../../constants/theme';
 
 export const SalespersonInvoicesScreen = () => {
   const router = useRouter();
@@ -27,23 +28,32 @@ export const SalespersonInvoicesScreen = () => {
   if (isLoading && invoices.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#2196F3" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }
 
   if (myInvoices.length === 0) {
     return (
-      <EmptyState
-        icon="📋"
-        title="No invoices yet"
-        message="Your created invoices will appear here"
-      />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.screenTitle}>Invoices</Text>
+        </View>
+        <EmptyState
+          title="No invoices yet"
+          message="Your created invoices will appear here"
+        />
+      </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.screenTitle}>Invoices</Text>
+        <Text style={styles.invoiceCount}>{myInvoices.length} invoices</Text>
+      </View>
+      
       <FlatList
         data={myInvoices}
         keyExtractor={(item) => item.id}
@@ -56,6 +66,7 @@ export const SalespersonInvoicesScreen = () => {
           />
         )}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -64,7 +75,26 @@ export const SalespersonInvoicesScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
+  },
+  header: {
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  screenTitle: {
+    fontSize: theme.typography.sizes.xxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+  },
+  invoiceCount: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray500,
+    fontWeight: theme.typography.weights.medium,
   },
   centerContainer: {
     flex: 1,
@@ -72,6 +102,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   listContent: {
-    padding: 16,
+    padding: theme.spacing.md,
   },
 });

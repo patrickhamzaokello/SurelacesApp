@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCartStore } from '@/store/cartStore';
+import { theme } from '@/constants/theme';
 
 interface CartIconWithBadgeProps {
   color: string;
@@ -42,19 +43,19 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -6,
     right: -6,
-    backgroundColor: '#FF4444',
+    backgroundColor: theme.colors.primary,
     borderRadius: 10,
     minWidth: 20,
     height: 20,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: theme.colors.white,
   },
   badgeText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: 'bold',
+    color: theme.colors.white,
+    fontSize: theme.typography.sizes.xs,
+    fontWeight: theme.typography.weights.bold,
     textAlign: 'center',
     paddingHorizontal: 4,
   },

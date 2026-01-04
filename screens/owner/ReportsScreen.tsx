@@ -3,6 +3,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useInvoicesStore } from '../../store/invoicesStore';
 import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
+import { theme } from '../../constants/theme';
 
 export const OwnerReportsScreen = () => {
   const { invoices } = useInvoicesStore();
@@ -77,72 +78,89 @@ export const OwnerReportsScreen = () => {
   }, [invoices]);
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Sales Summary</Text>
-        
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryPeriod}>Today</Text>
-          <Text style={styles.summaryAmount}>UGX {reports.dailySales.toFixed(0)}</Text>
-          <Text style={styles.summaryCount}>{reports.dailyCount} transactions</Text>
-        </View>
-
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryPeriod}>This Week</Text>
-          <Text style={styles.summaryAmount}>UGX {reports.weeklySales.toFixed(0)}</Text>
-          <Text style={styles.summaryCount}>{reports.weeklyCount} transactions</Text>
-        </View>
-
-        <View style={styles.summaryCard}>
-          <Text style={styles.summaryPeriod}>This Month</Text>
-          <Text style={styles.summaryAmount}>UGX {reports.monthlySales.toFixed(0)}</Text>
-          <Text style={styles.summaryCount}>{reports.monthlyCount} transactions</Text>
-        </View>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Reports</Text>
+        <Text style={styles.subtitle}>Sales analytics and insights</Text>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Sales by Salesperson</Text>
-        {reports.salesBySalesperson.length === 0 ? (
-          <Text style={styles.emptyText}>No sales data available</Text>
-        ) : (
-          reports.salesBySalesperson.map((person, index) => (
-            <View key={person.name} style={styles.listItem}>
-              <View style={styles.listItemLeft}>
-                <Text style={styles.listItemRank}>#{index + 1}</Text>
-                <Text style={styles.listItemName}>{person.name}</Text>
-              </View>
-              <View style={styles.listItemRight}>
-                <Text style={styles.listItemValue}>UGX {person.total.toFixed(0)}</Text>
-                <Text style={styles.listItemCount}>{person.count} sales</Text>
-              </View>
+      <View style={styles.content}>
+        {/* Sales Summary */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sales Summary</Text>
+          <View style={styles.summaryGrid}>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryPeriod}>Today</Text>
+              <Text style={styles.summaryAmount}>UGX {reports.dailySales.toFixed(0)}</Text>
+              <Text style={styles.summaryCount}>{reports.dailyCount} transactions</Text>
             </View>
-          ))
-        )}
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Top Selling Products</Text>
-        {reports.topProducts.length === 0 ? (
-          <Text style={styles.emptyText}>No product data available</Text>
-        ) : (
-          reports.topProducts.map((product, index) => (
-            <View key={product.name} style={styles.listItem}>
-              <View style={styles.listItemLeft}>
-                <Text style={styles.listItemRank}>#{index + 1}</Text>
-                <Text style={styles.listItemName} numberOfLines={2}>
-                  {product.name}
-                </Text>
-                <Text style={styles.listItemName} numberOfLines={2}>
-                  {product.name}
-                </Text>
-              </View>
-              <View style={styles.listItemRight}>
-                <Text style={styles.listItemValue}>UGX {product.revenue.toFixed(0)}</Text>
-                <Text style={styles.listItemCount}>{product.quantity} sold</Text>
-              </View>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryPeriod}>This Week</Text>
+              <Text style={styles.summaryAmount}>UGX {reports.weeklySales.toFixed(0)}</Text>
+              <Text style={styles.summaryCount}>{reports.weeklyCount} transactions</Text>
             </View>
-          ))
-        )}
+
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryPeriod}>This Month</Text>
+              <Text style={styles.summaryAmount}>UGX {reports.monthlySales.toFixed(0)}</Text>
+              <Text style={styles.summaryCount}>{reports.monthlyCount} transactions</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Sales by Salesperson */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sales by Salesperson</Text>
+          {reports.salesBySalesperson.length === 0 ? (
+            <Text style={styles.emptyText}>No sales data available</Text>
+          ) : (
+            <View style={styles.listContainer}>
+              {reports.salesBySalesperson.map((person, index) => (
+                <View key={person.name} style={styles.listItem}>
+                  <View style={styles.listItemLeft}>
+                    <View style={styles.rankBadge}>
+                      <Text style={styles.listItemRank}>{index + 1}</Text>
+                    </View>
+                    <Text style={styles.listItemName}>{person.name}</Text>
+                  </View>
+                  <View style={styles.listItemRight}>
+                    <Text style={styles.listItemValue}>UGX {person.total.toFixed(0)}</Text>
+                    <Text style={styles.listItemCount}>{person.count} sales</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
+
+        {/* Top Products */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Top Selling Products</Text>
+          {reports.topProducts.length === 0 ? (
+            <Text style={styles.emptyText}>No product data available</Text>
+          ) : (
+            <View style={styles.listContainer}>
+              {reports.topProducts.map((product, index) => (
+                <View key={product.name} style={styles.listItem}>
+                  <View style={styles.listItemLeft}>
+                    <View style={styles.rankBadge}>
+                      <Text style={styles.listItemRank}>{index + 1}</Text>
+                    </View>
+                    <Text style={styles.listItemName} numberOfLines={2}>
+                      {product.name}
+                    </Text>
+                  </View>
+                  <View style={styles.listItemRight}>
+                    <Text style={styles.listItemValue}>UGX {product.revenue.toFixed(0)}</Text>
+                    <Text style={styles.listItemCount}>{product.quantity} sold</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
       </View>
     </ScrollView>
   );
@@ -151,88 +169,125 @@ export const OwnerReportsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
+  },
+  header: {
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  title: {
+    fontSize: theme.typography.sizes.xxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
+  },
+  subtitle: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray500,
+    fontWeight: theme.typography.weights.medium,
+  },
+  content: {
+    padding: theme.spacing.md,
   },
   section: {
-    padding: 16,
+    marginBottom: theme.spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 12,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.md,
+  },
+  summaryGrid: {
+    gap: theme.spacing.sm,
   },
   summaryCard: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    marginBottom: theme.spacing.sm,
   },
   summaryPeriod: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
+    marginBottom: theme.spacing.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontWeight: theme.typography.weights.medium,
   },
   summaryAmount: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#2196F3',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.xxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.xs,
   },
   summaryCount: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray600,
+  },
+  listContainer: {
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   listItem: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
+    padding: theme.spacing.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.divider,
   },
   listItemLeft: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: theme.spacing.md,
+  },
+  rankBadge: {
+    width: 28,
+    height: 28,
+    borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.colors.gray50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   listItemRank: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2196F3',
-    marginRight: 12,
-    width: 30,
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
   },
   listItemName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.medium,
+    color: theme.colors.black,
     flex: 1,
   },
   listItemRight: {
     alignItems: 'flex-end',
   },
   listItemValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2196F3',
-    marginBottom: 2,
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
+    marginBottom: theme.spacing.xs,
   },
   listItemCount: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
   },
   emptyText: {
-    fontSize: 16,
-    color: '#999',
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray400,
     textAlign: 'center',
-    padding: 32,
+    padding: theme.spacing.xl,
   },
 });

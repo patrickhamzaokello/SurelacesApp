@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { useAuth } from '../../hooks/useAuth';
+import { theme } from '../../constants/theme';
 
 export const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -38,42 +39,47 @@ export const LoginScreen = () => {
     >
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.logo}>📱</Text>
-          <Text style={styles.title}>Sales App</Text>
+          <Text style={styles.title}>Surelaces</Text>
           <Text style={styles.subtitle}>Sign in to continue</Text>
         </View>
 
         <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={(text) => {
-              setEmail(text);
-              clearError();
-            }}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            autoCorrect={false}
-          />
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Email</Text>
+            <TextInput
+              style={[styles.input, error && styles.inputError]}
+              placeholder="Enter your email"
+              placeholderTextColor={theme.colors.gray400}
+              value={email}
+              onChangeText={(text) => {
+                setEmail(text);
+                clearError();
+              }}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoCorrect={false}
+            />
+          </View>
 
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            value={password}
-            onChangeText={(text) => {
-              setPassword(text);
-              clearError();
-            }}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={[styles.input, error && styles.inputError]}
+              placeholder="Enter your password"
+              placeholderTextColor={theme.colors.gray400}
+              value={password}
+              onChangeText={(text) => {
+                setPassword(text);
+                clearError();
+              }}
+              secureTextEntry
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
 
           {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>{error}</Text>
-            </View>
+            <Text style={styles.errorText}>{error}</Text>
           )}
 
           <TouchableOpacity
@@ -82,7 +88,7 @@ export const LoginScreen = () => {
             disabled={isLoading}
           >
             {isLoading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={theme.colors.white} />
             ) : (
               <Text style={styles.buttonText}>Sign In</Text>
             )}
@@ -102,81 +108,91 @@ export const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
   },
   content: {
     flex: 1,
-    padding: 24,
+    padding: theme.spacing.xl,
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 48,
-  },
-  logo: {
-    fontSize: 64,
-    marginBottom: 16,
+    marginBottom: theme.spacing.xxl,
   },
   title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: theme.typography.sizes.xxxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.sm,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.gray500,
+    fontWeight: theme.typography.weights.normal,
   },
   form: {
-    marginBottom: 24,
+    marginBottom: theme.spacing.xl,
+  },
+  inputGroup: {
+    marginBottom: theme.spacing.lg,
+  },
+  label: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.black,
+    fontWeight: theme.typography.weights.medium,
+    marginBottom: theme.spacing.sm,
   },
   input: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    fontSize: 16,
-    marginBottom: 16,
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    fontSize: theme.typography.sizes.md,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: theme.colors.border,
+    color: theme.colors.black,
   },
-  errorContainer: {
-    backgroundColor: '#FFEBEE',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
+  inputError: {
+    borderColor: theme.colors.error,
   },
   errorText: {
-    color: '#C62828',
-    fontSize: 14,
+    color: theme.colors.error,
+    fontSize: theme.typography.sizes.sm,
+    marginTop: theme.spacing.sm,
+    fontWeight: theme.typography.weights.medium,
   },
   button: {
-    backgroundColor: '#2196F3',
-    padding: 18,
-    borderRadius: 8,
+    backgroundColor: theme.colors.primary,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
     alignItems: 'center',
+    marginTop: theme.spacing.md,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '700',
+    color: theme.colors.white,
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
   },
   demoInfo: {
-    backgroundColor: '#E3F2FD',
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: theme.colors.gray50,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   demoTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1976D2',
-    marginBottom: 8,
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.sm,
   },
   demoText: {
-    fontSize: 13,
-    color: '#1976D2',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray600,
+    marginBottom: theme.spacing.xs,
+    fontFamily: 'monospace',
   },
 });

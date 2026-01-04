@@ -8,6 +8,7 @@ import { useSync } from '../../hooks/useSync';
 import { SyncIndicator } from '../../components/SyncIndicator';
 import { InvoiceCard } from '../../components/InvoiceCard';
 import { EmptyState } from '../../components/EmptyState';
+import { theme } from '../../constants/theme';
 
 export const SalespersonHomeScreen = () => {
   const navigation = useNavigation();
@@ -16,60 +17,91 @@ export const SalespersonHomeScreen = () => {
   const { pendingInvoices } = useSync();
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header Section */}
       <View style={styles.header}>
-        <Text style={styles.greeting}>Hello, {user?.name}!</Text>
+        <View>
+          <Text style={styles.greeting}>Hello, {user?.name}</Text>
+          <Text style={styles.subtitle}>Ready to make some sales?</Text>
+        </View>
         <Text style={styles.date}>{stats.date}</Text>
       </View>
 
-      <SyncIndicator />
+      {/* Content */}
+      <View style={styles.content}>
+        {/* Sync Indicator */}
+        <SyncIndicator />
 
-      {pendingInvoices > 0 && (
-        <View style={styles.warningCard}>
-          <Text style={styles.warningText}>
-            ⚠️ {pendingInvoices} invoice{pendingInvoices > 1 ? 's' : ''} pending sync
-          </Text>
-        </View>
-      )}
-
-      <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{stats.totalSales.toFixed(2)}</Text>
-          <Text style={styles.statLabel}>Total Sales Today</Text>
-        </View>
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{stats.invoiceCount}</Text>
-          <Text style={styles.statLabel}>Invoices Created</Text>
-        </View>
-      </View>
-
-      <TouchableOpacity
-        style={styles.newSaleButton}
-        onPress={() => navigation.navigate('Products' as never)}
-      >
-        <Text style={styles.newSaleButtonText}>➕ New Sale</Text>
-      </TouchableOpacity>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Invoices</Text>
-        {stats.recentInvoices.length === 0 ? (
-          <EmptyState
-            icon="📋"
-            title="No sales yet"
-            message="Start making sales to see them here"
-          />
-        ) : (
-          stats.recentInvoices.map((invoice) => (
-            <InvoiceCard
-              key={invoice.id}
-              invoice={invoice}
-              onPress={() => {
-                // Navigate to invoice detail
-                
-              }}
-            />
-          ))
+        {/* Pending Sync Warning */}
+        {pendingInvoices > 0 && (
+          <View style={styles.warningCard}>
+            <Text style={styles.warningText}>
+              {pendingInvoices} invoice{pendingInvoices > 1 ? 's' : ''} pending sync
+            </Text>
+          </View>
         )}
+
+        {/* Quick Actions */}
+        <View style={styles.quickActions}>
+          <TouchableOpacity
+            style={styles.primaryAction}
+            onPress={() => navigation.navigate('Products' as never)}
+          >
+            <Text style={styles.primaryActionText}>New Sale</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.secondaryAction}
+            onPress={() => navigation.navigate('Invoices' as never)}
+          >
+            <Text style={styles.secondaryActionText}>View Invoices</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Stats Cards */}
+        <View style={styles.statsSection}>
+          <Text style={styles.sectionTitle}>Today's Performance</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>UGX {stats.totalSales.toFixed(0)}</Text>
+              <Text style={styles.statLabel}>Total Sales</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statValue}>{stats.invoiceCount}</Text>
+              <Text style={styles.statLabel}>Invoices</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Recent Invoices */}
+        <View style={styles.recentSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Recent Activity</Text>
+            {stats.recentInvoices.length > 0 && (
+              <TouchableOpacity onPress={() => navigation.navigate('Invoices' as never)}>
+                <Text style={styles.viewAllText}>View All</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          {stats.recentInvoices.length === 0 ? (
+            <EmptyState
+              title="No sales today"
+              message="Create your first sale by adding products to cart"
+            />
+          ) : (
+            <View style={styles.invoicesList}>
+              {stats.recentInvoices.slice(0, 3).map((invoice) => (
+                <InvoiceCard
+                  key={invoice.id}
+                  invoice={invoice}
+                  onPress={() => {
+                    // Navigate to invoice detail
+                  }}
+                />
+              ))}
+            </View>
+          )}
+        </View>
       </View>
     </ScrollView>
   );
@@ -78,88 +110,131 @@ export const SalespersonHomeScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
   },
   header: {
-    padding: 20,
-    backgroundColor: '#2196F3',
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   greeting: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
+  },
+  subtitle: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray500,
+    fontWeight: theme.typography.weights.normal,
   },
   date: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray500,
+    fontWeight: theme.typography.weights.medium,
+  },
+  content: {
+    padding: theme.spacing.md,
   },
   warningCard: {
-    backgroundColor: '#FFF3CD',
-    padding: 12,
-    margin: 16,
-    marginTop: 0,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: '#FF9800',
+    backgroundColor: theme.colors.gray50,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    marginBottom: theme.spacing.lg,
   },
   warningText: {
-    fontSize: 14,
-    color: '#856404',
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.primary,
+    fontWeight: theme.typography.weights.medium,
   },
-  statsContainer: {
+  quickActions: {
     flexDirection: 'row',
-    padding: 16,
-    gap: 12,
+    gap: theme.spacing.md,
+    marginBottom: theme.spacing.xl,
+  },
+  primaryAction: {
+    flex: 2,
+    backgroundColor: theme.colors.primary,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    alignItems: 'center',
+  },
+  primaryActionText: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.white,
+  },
+  secondaryAction: {
+    flex: 1,
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  secondaryActionText: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.medium,
+    color: theme.colors.black,
+  },
+  statsSection: {
+    marginBottom: theme.spacing.xl,
+  },
+  sectionTitle: {
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.md,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: theme.spacing.md,
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 12,
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   statValue: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#2196F3',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
   },
   statLabel: {
-    fontSize: 12,
-    color: '#666',
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
     textAlign: 'center',
+    fontWeight: theme.typography.weights.medium,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
-  newSaleButton: {
-    backgroundColor: '#4CAF50',
-    margin: 16,
-    marginTop: 0,
-    padding: 18,
-    borderRadius: 12,
+  recentSection: {
+    marginBottom: theme.spacing.xl,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    marginBottom: theme.spacing.md,
   },
-  newSaleButtonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#fff',
+  viewAllText: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.primary,
+    fontWeight: theme.typography.weights.semibold,
   },
-  section: {
-    padding: 16,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 16,
+  invoicesList: {
+    gap: theme.spacing.sm,
   },
 });

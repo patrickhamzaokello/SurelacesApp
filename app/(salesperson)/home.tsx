@@ -16,6 +16,7 @@ import { InvoiceCard } from "@/components/InvoiceCard";
 import { EmptyState } from "@/components/EmptyState";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
+import { SalespersonHomeScreen } from "@/screens/salesperson/HomeScreen";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -24,63 +25,10 @@ export default function HomeScreen() {
   const { pendingInvoices } = useSync();
 
   return (
-    <ScrollView style={styles.container}>
-      <SafeAreaView>
-        <StatusBar style="dark" />
-        <View style={styles.header}>
-          <Text style={styles.greeting}>Hello, {user?.name}!</Text>
-          <Text style={styles.date}>{stats.date}</Text>
-        </View>
-
-        <SyncIndicator />
-
-        {pendingInvoices > 0 && (
-          <View style={styles.warningCard}>
-            <Text style={styles.warningText}>
-              ⚠️ {pendingInvoices} invoice{pendingInvoices > 1 ? "s" : ""}{" "}
-              pending sync
-            </Text>
-          </View>
-        )}
-
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>${stats.totalSales.toFixed(2)}</Text>
-            <Text style={styles.statLabel}>Total Sales Today</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>{stats.invoiceCount}</Text>
-            <Text style={styles.statLabel}>Invoices Created</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity
-          style={styles.newSaleButton}
-          onPress={() => router.push("/(salesperson)/products")}
-        >
-          <Text style={styles.newSaleButtonText}>➕ New Sale</Text>
-        </TouchableOpacity>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Invoices</Text>
-          {stats.recentInvoices.length === 0 ? (
-            <EmptyState
-              icon="📋"
-              title="No sales yet"
-              message="Start making sales to see them here"
-            />
-          ) : (
-            stats.recentInvoices.map((invoice) => (
-              <InvoiceCard
-                key={invoice.id}
-                invoice={invoice}
-                onPress={() => {}}
-              />
-            ))
-          )}
-        </View>
-      </SafeAreaView>
-    </ScrollView>
+    <View style={styles.container}>
+      <StatusBar style="dark" />
+      <SalespersonHomeScreen />
+    </View>
   );
 }
 

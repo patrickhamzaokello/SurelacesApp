@@ -1,17 +1,17 @@
 // src/components/EmptyState.tsx
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '../constants/theme';
 
 interface EmptyStateProps {
-  icon: string;
   title: string;
   message: string;
+  icon?: string;
 }
 
-export const EmptyState: React.FC<EmptyStateProps> = ({ icon, title, message }) => {
+export const EmptyState: React.FC<EmptyStateProps> = ({ title, message, icon }) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{icon}</Text>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.message}>{message}</Text>
     </View>
@@ -23,22 +23,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 32,
-  },
-  icon: {
-    fontSize: 64,
-    marginBottom: 16,
+    padding: theme.spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.sm,
     textAlign: 'center',
   },
   message: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.gray500,
     textAlign: 'center',
+    lineHeight: 22,
   },
 });

@@ -7,10 +7,10 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DashboardMain() {
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
         <StatusBar style="dark" />
         <OwnerDashboardScreen />
-    </SafeAreaView>
+    </View>
   );
 }
 

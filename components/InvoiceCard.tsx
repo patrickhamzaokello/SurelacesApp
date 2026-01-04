@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Invoice } from '../types';
 import { format } from 'date-fns';
+import { theme } from '../constants/theme';
 
 interface InvoiceCardProps {
   invoice: Invoice;
@@ -18,26 +19,26 @@ export const InvoiceCard: React.FC<InvoiceCardProps> = ({
   const getStatusColor = () => {
     switch (invoice.sync_status) {
       case 'SYNCED':
-        return '#4CAF50';
+        return theme.colors.success;
       case 'PENDING':
-        return '#FF9800';
+        return theme.colors.primary;
       case 'FAILED':
-        return '#F44336';
+        return theme.colors.error;
       default:
-        return '#999';
+        return theme.colors.gray400;
     }
   };
 
-  const getStatusIcon = () => {
+  const getStatusLabel = () => {
     switch (invoice.sync_status) {
       case 'SYNCED':
-        return '🟢';
+        return 'Synced';
       case 'PENDING':
-        return '🟡';
+        return 'Pending';
       case 'FAILED':
-        return '🔴';
+        return 'Failed';
       default:
-        return '⚪';
+        return 'Unknown';
     }
   };
 
@@ -50,11 +51,8 @@ export const InvoiceCard: React.FC<InvoiceCardProps> = ({
             {format(new Date(invoice.created_at), 'MMM d, yyyy h:mm a')}
           </Text>
         </View>
-        <View style={styles.statusBadge}>
-          <Text style={styles.statusIcon}>{getStatusIcon()}</Text>
-          <Text style={[styles.statusText, { color: getStatusColor() }]}>
-            {invoice.sync_status}
-          </Text>
+        <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
+          <Text style={styles.statusText}>{getStatusLabel()}</Text>
         </View>
       </View>
 
@@ -74,68 +72,64 @@ export const InvoiceCard: React.FC<InvoiceCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: theme.spacing.sm,
   },
   headerLeft: {
     flex: 1,
   },
   invoiceNumber: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
   },
   date: {
-    fontSize: 13,
-    color: '#666',
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
   },
   statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  statusIcon: {
-    fontSize: 12,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.sm,
+    alignSelf: 'flex-start',
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'capitalize',
+    fontSize: theme.typography.sizes.xs,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.white,
+    textTransform: 'uppercase',
   },
   salesperson: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray600,
+    marginBottom: theme.spacing.sm,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 8,
+    marginTop: theme.spacing.sm,
+    paddingTop: theme.spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: theme.colors.divider,
   },
   itemsCount: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray600,
   },
   total: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#2196F3',
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
   },
 });

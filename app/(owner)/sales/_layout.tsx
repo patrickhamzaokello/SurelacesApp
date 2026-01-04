@@ -1,17 +1,21 @@
 // app/(owner)/sales/_layout.tsx
+import { theme } from '@/constants/theme';
 import { Stack } from 'expo-router';
 
 export default function SalesLayout() {
   return (
     <Stack
       screenOptions={{
+       
         headerStyle: {
-          backgroundColor: '#2196F3',
+          backgroundColor: theme.colors.white,
         },
-        headerTintColor: '#fff',
+        headerTintColor: theme.colors.black,
         headerTitleStyle: {
-          fontWeight: '700',
+          fontWeight: theme.typography.weights.semibold,
+          fontSize: theme.typography.sizes.lg,
         },
+        headerShown: false
       }}
     >
       <Stack.Screen 

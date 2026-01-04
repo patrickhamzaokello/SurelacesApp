@@ -6,6 +6,7 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { SyncIndicator } from '../../components/SyncIndicator';
 import { useAuth } from '../../hooks/useAuth';
 import { useSync } from '../../hooks/useSync';
+import { theme } from '../../constants/theme';
 
 export const ProfileScreen = () => {
   const { user, logout, isSalesperson, isOwner } = useAuth();
@@ -65,64 +66,88 @@ export const ProfileScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      {/* Header Section */}
       <View style={styles.header}>
-        <View style={styles.avatarContainer}>
-          <Text style={styles.avatar}>{user?.name.charAt(0).toUpperCase()}</Text>
-        </View>
-        <Text style={styles.name}>{user?.name}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
-        <View style={styles.roleBadge}>
-          <Text style={styles.roleText}>
-            {isSalesperson ? '👤 Salesperson' : '👑 Store Owner'}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Store Information</Text>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Store Name</Text>
-          <Text style={styles.infoValue}>{user?.store_name}</Text>
+        <View style={styles.profileInfo}>
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatar}>{user?.name.charAt(0).toUpperCase()}</Text>
+          </View>
+          <View style={styles.userDetails}>
+            <Text style={styles.name}>{user?.name}</Text>
+            <Text style={styles.email}>{user?.email}</Text>
+            <View style={styles.roleBadge}>
+              <Text style={styles.roleText}>
+                {isSalesperson ? 'Salesperson' : 'Store Owner'}
+              </Text>
+            </View>
+          </View>
         </View>
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Sync Status</Text>
-        <SyncIndicator />
-        {lastSyncTime && (
-          <Text style={styles.syncTime}>
-            Last synced: {format(new Date(lastSyncTime), 'MMM d, yyyy h:mm a')}
-          </Text>
-        )}
+      {/* Content */}
+      <View style={styles.content}>
+        {/* Store Information */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Store Information</Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.infoLabel}>Store Name</Text>
+            <Text style={styles.infoValue}>{user?.store_name}</Text>
+          </View>
+          <View style={styles.infoCard}>
+            <Text style={styles.infoLabel}>User Role</Text>
+            <Text style={styles.infoValue}>{isSalesperson ? 'Salesperson' : 'Store Owner'}</Text>
+          </View>
+        </View>
+
+        {/* Sync Status */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sync Status</Text>
+          <View style={styles.syncContainer}>
+            <SyncIndicator />
+            {lastSyncTime && (
+              <Text style={styles.syncTime}>
+                Last synced: {format(new Date(lastSyncTime), 'MMM d, yyyy h:mm a')}
+              </Text>
+            )}
+            <TouchableOpacity
+              style={[styles.button, styles.syncButton]}
+              onPress={handleSync}
+              disabled={isSyncing}
+            >
+              <Text style={styles.buttonText}>
+                {isSyncing ? 'Syncing...' : 'Sync Now'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* App Information */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>App Information</Text>
+          <View style={styles.infoCard}>
+            <Text style={styles.infoLabel}>Version</Text>
+            <Text style={styles.infoValue}>1.0.0</Text>
+          </View>
+          <View style={styles.infoCard}>
+            <Text style={styles.infoLabel}>Platform</Text>
+            <Text style={styles.infoValue}>Surelaces POS</Text>
+          </View>
+        </View>
+
+        {/* Logout Button */}
         <TouchableOpacity
-          style={[styles.button, styles.syncButton]}
-          onPress={handleSync}
-          disabled={isSyncing}
+          style={styles.logoutButton}
+          onPress={handleLogout}
         >
-          <Text style={styles.buttonText}>
-            {isSyncing ? 'Syncing...' : '🔄 Sync Now'}
-          </Text>
+          <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>App Information</Text>
-        <View style={styles.infoCard}>
-          <Text style={styles.infoLabel}>Version</Text>
-          <Text style={styles.infoValue}>1.0.0</Text>
+        {/* Footer */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>© 2025 Surelaces</Text>
+          <Text style={styles.footerSubtext}>Point of Sale System</Text>
         </View>
-      </View>
-
-      <TouchableOpacity
-        style={[styles.button, styles.logoutButton]}
-        onPress={handleLogout}
-      >
-        <Text style={[styles.buttonText, styles.logoutButtonText]}>Logout</Text>
-      </TouchableOpacity>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>© 2025 Sales App</Text>
       </View>
     </ScrollView>
   );
@@ -131,112 +156,147 @@ export const ProfileScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 24,
-    alignItems: 'center',
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: theme.colors.border,
+  },
+  profileInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   avatarContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#2196F3',
+    width: 64,
+    height: 64,
+    borderRadius: theme.borderRadius.xl,
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginRight: theme.spacing.md,
   },
   avatar: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: '#fff',
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.white,
+  },
+  userDetails: {
+    flex: 1,
   },
   name: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
   },
   email: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 12,
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray500,
+    marginBottom: theme.spacing.sm,
   },
   roleBadge: {
-    backgroundColor: '#E3F2FD',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: theme.colors.gray50,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    alignSelf: 'flex-start',
   },
   roleText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#2196F3',
+    fontSize: theme.typography.sizes.xs,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  content: {
+    padding: theme.spacing.md,
   },
   section: {
-    padding: 16,
+    marginBottom: theme.spacing.xl,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 12,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.md,
   },
   infoCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 8,
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   infoLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
+    marginBottom: theme.spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontWeight: theme.typography.weights.medium,
   },
   infoValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+  },
+  syncContainer: {
+    backgroundColor: theme.colors.white,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   syncTime: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 8,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
+    marginTop: theme.spacing.sm,
     textAlign: 'center',
   },
   button: {
-    padding: 16,
-    borderRadius: 8,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
     alignItems: 'center',
-    marginTop: 12,
+    marginTop: theme.spacing.md,
   },
   syncButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: theme.colors.primary,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.white,
   },
   logoutButton: {
-    backgroundColor: '#fff',
-    borderWidth: 2,
-    borderColor: '#F44336',
-    marginHorizontal: 16,
-    marginBottom: 16,
+    backgroundColor: theme.colors.white,
+    borderWidth: 1,
+    borderColor: theme.colors.error,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    alignItems: 'center',
+    marginBottom: theme.spacing.xl,
   },
   logoutButtonText: {
-    color: '#F44336',
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.error,
   },
   footer: {
-    padding: 24,
     alignItems: 'center',
+    paddingBottom: theme.spacing.xl,
   },
   footerText: {
-    fontSize: 14,
-    color: '#999',
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray400,
+    marginBottom: theme.spacing.xs,
+  },
+  footerSubtext: {
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray400,
   },
 });

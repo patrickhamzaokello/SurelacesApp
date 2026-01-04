@@ -75,6 +75,7 @@ login: async (email: string, password: string) => {
       access: accessToken,
       refresh: refreshToken,
       expiresAt,
+      loginTimestamp: Date.now(),
     };
 
     await Promise.all([
@@ -126,14 +127,27 @@ login: async (email: string, password: string) => {
         secureStorage.getUser(),
       ]);
 
-      if (tokens && user && tokens.expiresAt && tokens.expiresAt > Date.now()) {
-        set({
-          user,
-          isAuthenticated: true,
-          isLoading: false,
-        });
+      if (tokens && user && tokens.loginTimestamp) {
+        const sevenDays = 7 * 24 * 60 * 60 * 1000;
+        const isWithinSevenDays = Date.now() - tokens.loginTimestamp < sevenDays;
+
+        if (isWithinSevenDays) {
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } else {
+          // 7 days expired → clear everything
+          await secureStorage.clearAll();
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
       } else {
-        // Expired or missing → clear everything
+        // Missing tokens or user → clear everything
         await secureStorage.clearAll();
         set({
           user: null,

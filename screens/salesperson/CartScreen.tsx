@@ -14,6 +14,7 @@ import { useInvoicesStore } from '../../store/invoicesStore';
 import { useAuth } from '../../hooks/useAuth';
 import { EmptyState } from '../../components/EmptyState';
 import { InvoiceItem } from '../../types';
+import { theme } from '../../constants/theme';
 
 export const CartScreen = () => {
   const router = useRouter();
@@ -65,16 +66,25 @@ export const CartScreen = () => {
 
   if (items.length === 0) {
     return (
-      <EmptyState
-        icon="🛒"
-        title="Cart is empty"
-        message="Add products from the Products tab"
-      />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.screenTitle}>Cart</Text>
+        </View>
+        <EmptyState
+          title="Cart is empty"
+          message="Add products from the Products tab"
+        />
+      </View>
     );
   }
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.screenTitle}>Cart</Text>
+        <Text style={styles.itemCount}>{items.length} items</Text>
+      </View>
+      
       <FlatList
         data={items}
         keyExtractor={(item) => item.product.id}
@@ -86,7 +96,7 @@ export const CartScreen = () => {
               </Text>
               <Text style={styles.itemCode}>{item.product.code}</Text>
               <Text style={styles.itemPrice}>
-                {parseFloat(item.product.price).toFixed(0)} each
+                UGX {parseFloat(item.product.price).toFixed(0)} each
               </Text>
             </View>
             <View style={styles.quantityContainer}>
@@ -106,7 +116,7 @@ export const CartScreen = () => {
             </View>
             <View style={styles.itemTotal}>
               <Text style={styles.itemTotalText}>
-                {(parseFloat(item.product.price) * item.quantity).toFixed(0)}
+                UGX {(parseFloat(item.product.price) * item.quantity).toFixed(0)}
               </Text>
               <TouchableOpacity
                 style={styles.removeButton}
@@ -118,6 +128,7 @@ export const CartScreen = () => {
           </View>
         )}
         contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
       />
 
       <View style={styles.footer}>
@@ -136,25 +147,24 @@ export const CartScreen = () => {
           </View>
         </View>
 
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.clearButton}
-            onPress={() => {
-              Alert.alert('Clear Cart', 'Remove all items from cart?', [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Clear', onPress: clearCart, style: 'destructive' },
-              ]);
-            }}
-          >
-            <Text style={styles.clearButtonText}>Clear Cart</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.createButton}
-            onPress={handleCreateInvoice}
-          >
-            <Text style={styles.createButtonText}>Create Invoice</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.createButton}
+          onPress={handleCreateInvoice}
+        >
+          <Text style={styles.createButtonText}>Create Invoice</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={styles.clearButton}
+          onPress={() => {
+            Alert.alert('Clear Cart', 'Remove all items from cart?', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Clear', onPress: clearCart, style: 'destructive' },
+            ]);
+          }}
+        >
+          <Text style={styles.clearButtonText}>Clear Cart</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -163,65 +173,83 @@ export const CartScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: theme.colors.background,
+  },
+  header: {
+    padding: theme.spacing.md,
+    backgroundColor: theme.colors.white,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  screenTitle: {
+    fontSize: theme.typography.sizes.xxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+  },
+  itemCount: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray500,
+    fontWeight: theme.typography.weights.medium,
   },
   listContent: {
-    padding: 16,
+    padding: theme.spacing.md,
   },
   cartItem: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: theme.colors.white,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   itemInfo: {
     flex: 1,
-    marginRight: 12,
+    marginRight: theme.spacing.md,
   },
   itemName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
   },
   itemCode: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.gray500,
+    marginBottom: theme.spacing.xs,
+    fontFamily: 'monospace',
   },
   itemPrice: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray600,
   },
   quantityContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: theme.spacing.md,
   },
   quantityButton: {
     width: 32,
     height: 32,
-    borderRadius: 16,
-    backgroundColor: '#2196F3',
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityButtonText: {
-    fontSize: 20,
-    color: '#fff',
-    fontWeight: '600',
+    fontSize: theme.typography.sizes.lg,
+    color: theme.colors.white,
+    fontWeight: theme.typography.weights.semibold,
   },
   quantity: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginHorizontal: 12,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.black,
+    marginHorizontal: theme.spacing.md,
     minWidth: 30,
     textAlign: 'center',
   },
@@ -229,81 +257,80 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   itemTotalText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#2196F3',
-    marginBottom: 4,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
   },
   removeButton: {
-    padding: 4,
+    padding: theme.spacing.xs,
   },
   removeButtonText: {
-    fontSize: 12,
-    color: '#F44336',
+    fontSize: theme.typography.sizes.xs,
+    color: theme.colors.error,
+    fontWeight: theme.typography.weights.medium,
   },
   footer: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.colors.white,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    padding: 16,
+    borderTopColor: theme.colors.border,
+    padding: theme.spacing.md,
   },
   totals: {
-    marginBottom: 16,
+    marginBottom: theme.spacing.md,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: theme.spacing.sm,
   },
   totalLabel: {
-    fontSize: 16,
-    color: '#666',
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.gray600,
   },
   totalValue: {
-    fontSize: 16,
-    color: '#333',
+    fontSize: theme.typography.sizes.md,
+    color: theme.colors.black,
+    fontWeight: theme.typography.weights.medium,
   },
   grandTotal: {
-    paddingTop: 8,
+    paddingTop: theme.spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: theme.colors.border,
   },
   grandTotalLabel: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#333',
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
   },
   grandTotalValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#2196F3',
-  },
-  actions: {
-    flexDirection: 'row',
-    gap: 12,
+    fontSize: theme.typography.sizes.xl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
   },
   clearButton: {
-    flex: 1,
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: '#f5f5f5',
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.white,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    marginTop: theme.spacing.sm,
   },
   clearButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.medium,
+    color: theme.colors.gray600,
   },
   createButton: {
-    flex: 2,
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: '#4CAF50',
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.primary,
     alignItems: 'center',
   },
   createButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#fff',
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.white,
   },
 });
