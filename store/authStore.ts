@@ -60,6 +60,7 @@ login: async (email: string, password: string) => {
       store_id,
       store_name,
       role,
+      is_verified: true, // User must be verified to login per API docs
     };
 
     const accessToken = tokens.access;
@@ -67,13 +68,13 @@ login: async (email: string, password: string) => {
 
     let expiresAt = decodeJwtExp(accessToken);
     if (!expiresAt) {
-      console.warn('Could not decode JWT exp, using fallback expiration (4 minutes)');
-      expiresAt = Date.now() + 60 * 4 * 1000;
+      console.warn('Could not decode JWT exp, using fallback expiration (24 hours per API docs)');
+      expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours as per API docs
     }
 
     const authTokens: AuthTokens = {
-      accessToken,
-      refreshToken,
+      access: accessToken,
+      refresh: refreshToken,
       expiresAt,
     };
 
@@ -92,7 +93,8 @@ login: async (email: string, password: string) => {
     return user; // Return the user object
   } catch (error: any) {
     const message =
-      error.response?.data?.message ||
+      error.response?.data?.detail ||
+      error.response?.data?.error ||
       error.message ||
       'Login failed. Please try again.';
 
@@ -125,7 +127,7 @@ login: async (email: string, password: string) => {
         secureStorage.getUser(),
       ]);
 
-      if (tokens && user && tokens.expiresAt > Date.now()) {
+      if (tokens && user && tokens.expiresAt && tokens.expiresAt > Date.now()) {
         set({
           user,
           isAuthenticated: true,

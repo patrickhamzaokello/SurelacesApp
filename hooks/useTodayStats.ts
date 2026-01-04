@@ -21,7 +21,7 @@ export const useTodayStats = (salespersonId?: string) => {
     }
 
     const totalSales = todayInvoices.reduce(
-      (sum, invoice) => sum + invoice.total,
+      (sum, invoice) => sum + Number(invoice.total),
       0
     );
 

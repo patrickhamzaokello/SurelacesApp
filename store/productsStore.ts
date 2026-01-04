@@ -25,7 +25,8 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const products = await apiClient.getProducts();
+      const response = await apiClient.getProducts();
+      const products = response.results;
       
       set({
         products,
@@ -34,7 +35,7 @@ export const useProductsStore = create<ProductsState>((set, get) => ({
       });
     } catch (error: any) {
       set({
-        error: error.message || 'Failed to fetch products',
+        error: error.response?.data?.detail || error.message || 'Failed to fetch products',
         isLoading: false,
       });
     }

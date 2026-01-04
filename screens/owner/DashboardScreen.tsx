@@ -42,13 +42,13 @@ export const OwnerDashboardScreen = () => {
       <View style={styles.statsGrid}>
         <View style={styles.statCard}>
           <Text style={styles.statIcon}>💰</Text>
-          <Text style={styles.statValue}>${stats.totalSales.toFixed(2)}</Text>
+          <Text style={styles.statValue}>${stats.totalSales}</Text>
           <Text style={styles.statLabel}>Total Sales Today</Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={styles.statIcon}>📋</Text>
-          <Text style={styles.statValue}>{stats.invoiceCount}</Text>
+          <Text style={styles.statValue}>{stats.totalSales}</Text>
           <Text style={styles.statLabel}>Invoices Today</Text>
         </View>
 

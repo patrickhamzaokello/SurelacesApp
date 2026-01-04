@@ -1,8 +1,24 @@
 // src/api/apiClient.ts
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { secureStorage } from '../utils/secureStorage';
+import type { 
+  User, 
+  AuthTokens, 
+  Product, 
+  Invoice, 
+  Category, 
+  Store, 
+  Role, 
+  DashboardStats, 
+  SalesReport, 
+  ProductReport,
+  SyncStatus,
+  SyncHistory,
+  BulkSyncResponse,
+  PaginatedResponse 
+} from '../types';
 
-const API_BASE_URL = 'https://surelaces.mwonya.com/'; // Replace with your API URL
+const API_BASE_URL = 'https://surelaces.mwonya.com';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -30,8 +46,8 @@ class ApiClient {
       async (config: InternalAxiosRequestConfig) => {
         const tokens = await secureStorage.getTokens();
         
-        if (tokens?.accessToken) {
-          config.headers.Authorization = `Bearer ${tokens.accessToken}`;
+        if (tokens?.access) {
+          config.headers.Authorization = `Bearer ${tokens.access}`;
         }
 
         return config;
@@ -71,29 +87,27 @@ class ApiClient {
           try {
             const tokens = await secureStorage.getTokens();
             
-            if (!tokens?.refreshToken) {
+            if (!tokens?.refresh) {
               throw new Error('No refresh token available');
             }
 
             // Call refresh endpoint
-            const response = await axios.post(`${API_BASE_URL}/auth/auth/token/refresh/`, {
-              refreshToken: tokens.refreshToken,
+            const response = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
+              refresh: tokens.refresh,
             });
 
-            const { accessToken, refreshToken, expiresIn } = response.data;
-            const expiresAt = Date.now() + expiresIn * 1000;
+            const { access, refresh } = response.data;
 
             await secureStorage.saveTokens({
-              accessToken,
-              refreshToken,
-              expiresAt,
+              access,
+              refresh,
             });
 
             // Process queued requests
-            this.processQueue(null, accessToken);
+            this.processQueue(null, access);
 
             // Retry original request
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+            originalRequest.headers.Authorization = `Bearer ${access}`;
             return this.client(originalRequest);
           } catch (refreshError) {
             this.processQueue(refreshError, null);
@@ -123,39 +137,219 @@ class ApiClient {
     this.failedQueue = [];
   }
 
-  // API Methods
+  // Authentication Methods
+  async register(data: {
+    email: string;
+    name: string;
+    password: string;
+    phone: string;
+    store_id: string;
+    role_id: string;
+  }) {
+    const response = await this.client.post('/auth/register/', data);
+    return response.data;
+  }
+
+  async verifyEmail(email: string, code: string) {
+    const response = await this.client.post('/auth/verify-email/', { email, code });
+    return response.data;
+  }
+
+  async resendVerificationCode(email: string) {
+    const response = await this.client.post('/auth/resend-verification-code/', { email });
+    return response.data;
+  }
+
   async login(email: string, password: string) {
-    const response = await this.client.post('/auth/auth/login/', { email, password });
+    const response = await this.client.post('/auth/login/', { email, password });
     return response.data;
   }
 
-  async getProducts() {
-    const response = await this.client.get('/pos/products/');
-    return response.data.results;
-  }
-
-  async createInvoice(invoice: any) {
-    const response = await this.client.post('/pos/invoices/', invoice);
+  async logout(refreshToken: string) {
+    const response = await this.client.post('/auth/logout/', { refresh: refreshToken });
     return response.data;
   }
 
-  async getInvoices(params?: { startDate?: string; endDate?: string; salespersonId?: string }) {
+  async requestPasswordReset(email: string) {
+    const response = await this.client.post('/auth/request-reset-email/', { email });
+    return response.data;
+  }
+
+  async verifyResetCode(email: string, code: string) {
+    const response = await this.client.post('/auth/verify-reset-code/', { email, code });
+    return response.data;
+  }
+
+  async completePasswordReset(password: string, token: string, uidb64: string) {
+    const response = await this.client.patch('/auth/password-reset-complete/', {
+      password,
+      token,
+      uidb64
+    });
+    return response.data;
+  }
+
+  // User Profile Methods
+  async getProfile(): Promise<User> {
+    const response = await this.client.get('/pos/profile/');
+    return response.data;
+  }
+
+  async updateProfile(data: { name?: string; phone?: string; bio?: string }): Promise<User> {
+    const response = await this.client.patch('/pos/profile/', data);
+    return response.data;
+  }
+
+  // Store & Roles Methods
+  async getStores(): Promise<Store[]> {
+    const response = await this.client.get('/pos/stores/');
+    return response.data;
+  }
+
+  async getMyStore(): Promise<Store> {
+    const response = await this.client.get('/pos/stores/me/');
+    return response.data;
+  }
+
+  async getRoles(): Promise<Role[]> {
+    const response = await this.client.get('/pos/roles/');
+    return response.data;
+  }
+
+  // Product Methods
+  async getProducts(params?: {
+    search?: string;
+    ordering?: string;
+    page?: number;
+  }): Promise<PaginatedResponse<Product>> {
+    const response = await this.client.get('/pos/products/', { params });
+    return response.data;
+  }
+
+  async getProduct(id: string): Promise<Product> {
+    const response = await this.client.get(`/pos/products/${id}/`);
+    return response.data;
+  }
+
+  async createProduct(data: Partial<Product>): Promise<Product> {
+    const response = await this.client.post('/pos/products/', data);
+    return response.data;
+  }
+
+  async updateProduct(id: string, data: Partial<Product>): Promise<Product> {
+    const response = await this.client.patch(`/pos/products/${id}/`, data);
+    return response.data;
+  }
+
+  async deleteProduct(id: string): Promise<void> {
+    await this.client.delete(`/pos/products/${id}/`);
+  }
+
+  async getLowStockProducts(): Promise<Product[]> {
+    const response = await this.client.get('/pos/products/low-stock/');
+    return response.data;
+  }
+
+  // Category Methods
+  async getCategories(params?: {
+    search?: string;
+    ordering?: string;
+    page?: number;
+  }): Promise<PaginatedResponse<Category>> {
+    const response = await this.client.get('/pos/categories/', { params });
+    return response.data;
+  }
+
+  async createCategory(data: Partial<Category>): Promise<Category> {
+    const response = await this.client.post('/pos/categories/', data);
+    return response.data;
+  }
+
+  async updateCategory(id: string, data: Partial<Category>): Promise<Category> {
+    const response = await this.client.patch(`/pos/categories/${id}/`, data);
+    return response.data;
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    await this.client.delete(`/pos/categories/${id}/`);
+  }
+
+  // Invoice Methods
+  async getInvoices(params?: {
+    ordering?: string;
+    page?: number;
+    start_date?: string;
+    end_date?: string;
+  }): Promise<PaginatedResponse<Invoice>> {
     const response = await this.client.get('/pos/invoices/', { params });
-    return response.data.results;
+    return response.data;
   }
 
-  async getDashboardStats() {
+  async getInvoice(id: string): Promise<Invoice> {
+    const response = await this.client.get(`/pos/invoices/${id}/`);
+    return response.data;
+  }
+
+  async createInvoice(data: Partial<Invoice>): Promise<Invoice> {
+    const response = await this.client.post('/pos/invoices/', data);
+    return response.data;
+  }
+
+  async bulkSyncInvoices(data: { invoices: any[] }): Promise<BulkSyncResponse> {
+    const response = await this.client.post('/pos/invoices/bulk-sync/', data);
+    return response.data;
+  }
+
+  // Reports & Analytics Methods
+  async getDashboardStats(): Promise<DashboardStats> {
     const response = await this.client.get('/pos/dashboard/stats/');
     return response.data;
   }
 
-  async bulkSyncInvoices (data: { invoices: any[] }) {
-    const response = await this.client.post('/pos/invoices/bulk-sync/', data);
+  async getSalesReport(params?: {
+    start_date?: string;
+    end_date?: string;
+  }): Promise<SalesReport[]> {
+    const response = await this.client.get('/pos/reports/sales/', { params });
     return response.data;
-  };
-  
+  }
 
-  // Add more API methods as needed
+  async getProductsReport(params?: {
+    start_date?: string;
+    end_date?: string;
+    limit?: number;
+  }): Promise<ProductReport[]> {
+    const response = await this.client.get('/pos/reports/products/', { params });
+    return response.data;
+  }
+
+  // Sync Management Methods
+  async getSyncStatus(): Promise<SyncStatus> {
+    const response = await this.client.get('/pos/sync/status/');
+    return response.data;
+  }
+
+  async getSyncHistory(): Promise<SyncHistory[]> {
+    const response = await this.client.get('/pos/sync/history/');
+    return response.data;
+  }
+
+  // Social Authentication Methods
+  async googleSignIn(authToken: string) {
+    const response = await this.client.post('/social_auth/google/', { auth_token: authToken });
+    return response.data;
+  }
+
+  async facebookSignIn(authToken: string) {
+    const response = await this.client.post('/social_auth/facebook/', { auth_token: authToken });
+    return response.data;
+  }
+
+  async appleSignIn(authToken: string) {
+    const response = await this.client.post('/social_auth/apple/', { auth_token: authToken });
+    return response.data;
+  }
+
   getClient() {
     return this.client;
   }

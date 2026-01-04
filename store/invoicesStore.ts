@@ -59,7 +59,7 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
         }
       }
       
-      const subtotal = items.reduce((sum, item) => sum + (item.total ? item.total : 0), 0);
+      const subtotal = items.reduce((sum, item) => sum + (item.total ? parseFloat(item.total) : 0), 0);
       const tax = subtotal * 0.1;
       const total = subtotal + tax;
 
@@ -69,9 +69,9 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
         salesperson: userId, // This MUST be UUID
         salesperson_name: userName,
         items, // Items MUST have product as UUID
-        subtotal,
-        tax,
-        total,
+        subtotal: subtotal.toString(),
+        tax: tax.toString(),
+        total: total.toString(),
         created_at: new Date().toISOString(),
         sync_status: 'PENDING',
       };
@@ -103,7 +103,8 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const fetchedInvoices = await apiClient.getInvoices(params);
+      const response = await apiClient.getInvoices(params);
+      const fetchedInvoices = response.results;
       
       const currentInvoices = get().invoices;
       const pendingInvoices = currentInvoices.filter(inv => inv.sync_status === 'PENDING');
@@ -127,7 +128,7 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
     } catch (error: any) {
       console.error('Fetch invoices error:', error);
       set({
-        error: error.message || 'Failed to fetch invoices',
+        error: error.response?.data?.detail || error.message || 'Failed to fetch invoices',
         isLoading: false,
       });
       
@@ -174,6 +175,10 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
           subtotal: invoice.subtotal,
           tax: invoice.tax,
           total: invoice.total,
+          customer_name: invoice.customer_name,
+          customer_phone: invoice.customer_phone,
+          customer_email: invoice.customer_email,
+          notes: invoice.notes,
           syncStatus: invoice.sync_status,
           items: invoice.items.map(item => ({
             product: item.product, // Must be UUID!

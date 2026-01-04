@@ -16,19 +16,19 @@ export const OwnerReportsScreen = () => {
     const today = invoices.filter(inv => 
       format(new Date(inv.created_at), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd')
     );
-    const dailySales = today.reduce((sum, inv) => sum + inv.total, 0);
+    const dailySales = today.reduce((sum, inv) => sum + Number(inv.total), 0);
 
     // Weekly stats
     const weekInvoices = invoices.filter(inv =>
       isWithinInterval(new Date(inv.created_at), { start: weekStart, end: now })
     );
-    const weeklySales = weekInvoices.reduce((sum, inv) => sum + inv.total, 0);
+    const weeklySales = weekInvoices.reduce((sum, inv) => sum + Number(inv.total), 0);
 
     // Monthly stats
     const monthInvoices = invoices.filter(inv =>
       isWithinInterval(new Date(inv.created_at), { start: monthStart, end: now })
     );
-    const monthlySales = monthInvoices.reduce((sum, inv) => sum + inv.total, 0);
+    const monthlySales = monthInvoices.reduce((sum, inv) => sum + Number(inv.total), 0);
 
     // Sales by salesperson
     const salesBySalesperson: Record<string, { name: string; total: number; count: number }> = {};
@@ -40,7 +40,7 @@ export const OwnerReportsScreen = () => {
           count: 0,
         };
       }
-      salesBySalesperson[inv.salesperson].total += inv.total;
+      salesBySalesperson[inv.salesperson].total += Number(inv.total);
       salesBySalesperson[inv.salesperson].count += 1;
     });
 
@@ -56,7 +56,7 @@ export const OwnerReportsScreen = () => {
           };
         }
         productStats[item.product].quantity += item.quantity;
-        productStats[item.product].revenue += item.total? item.total : 0;
+        productStats[item.product].revenue += item.total ? Number(item.total) : 0;
       });
     });
 
