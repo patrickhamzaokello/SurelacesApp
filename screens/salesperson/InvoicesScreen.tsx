@@ -1,12 +1,14 @@
 // src/screens/salesperson/InvoicesScreen.tsx
 import React, { useEffect } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 import { EmptyState } from '../../components/EmptyState';
 import { InvoiceCard } from '../../components/InvoiceCard';
 import { useAuth } from '../../hooks/useAuth';
 import { useInvoicesStore } from '../../store/invoicesStore';
 
 export const SalespersonInvoicesScreen = () => {
+  const router = useRouter();
   const { user } = useAuth();
   const { invoices, isLoading, fetchInvoices, loadLocalInvoices } = useInvoicesStore();
 
@@ -49,7 +51,10 @@ export const SalespersonInvoicesScreen = () => {
           <InvoiceCard
             invoice={item}
             onPress={() => {
-              // Navigate to invoice detail
+              router.push({
+                pathname: '/(salesperson)/invoice-details',
+                params: { invoiceId: item.id }
+              });
             }}
           />
         )}

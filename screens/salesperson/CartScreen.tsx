@@ -45,7 +45,7 @@ export const CartScreen = () => {
                 product_code: item.product.code,
                 quantity: item.quantity,
                 price: item.product.price,
-                total: item.product.price * item.quantity,
+                total: (parseFloat(item.product.price) * item.quantity).toString(),
               }));
 
               await createInvoice(invoiceItems, user!.user_id, user!.name);
@@ -86,7 +86,7 @@ export const CartScreen = () => {
               </Text>
               <Text style={styles.itemCode}>{item.product.code}</Text>
               <Text style={styles.itemPrice}>
-                ${item.product.price} each
+                ${parseFloat(item.product.price).toFixed(2)} each
               </Text>
             </View>
             <View style={styles.quantityContainer}>
@@ -106,7 +106,7 @@ export const CartScreen = () => {
             </View>
             <View style={styles.itemTotal}>
               <Text style={styles.itemTotalText}>
-                ${(item.product.price * item.quantity)}
+                ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
               </Text>
               <TouchableOpacity
                 style={styles.removeButton}
@@ -124,15 +124,15 @@ export const CartScreen = () => {
         <View style={styles.totals}>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Subtotal</Text>
-            <Text style={styles.totalValue}>${getSubtotal()}</Text>
+            <Text style={styles.totalValue}>${getSubtotal().toFixed(2)}</Text>
           </View>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Tax (10%)</Text>
-            <Text style={styles.totalValue}>${getTax(taxRate)}</Text>
+            <Text style={styles.totalValue}>${getTax(taxRate).toFixed(2)}</Text>
           </View>
           <View style={[styles.totalRow, styles.grandTotal]}>
             <Text style={styles.grandTotalLabel}>Total</Text>
-            <Text style={styles.grandTotalValue}>${getTotal(taxRate)}</Text>
+            <Text style={styles.grandTotalValue}>${getTotal(taxRate).toFixed(2)}</Text>
           </View>
         </View>
 

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useInvoicesStore } from '../../store/invoicesStore';
 import { InvoiceCard } from '../../components/InvoiceCard';
 import { EmptyState } from '../../components/EmptyState';
@@ -16,6 +17,7 @@ import { isToday } from 'date-fns';
 type FilterType = 'all' | 'today';
 
 export const OwnerSalesScreen = () => {
+  const router = useRouter();
   const { invoices, isLoading, fetchInvoices } = useInvoicesStore();
   const [filter, setFilter] = useState<FilterType>('today');
 
@@ -75,7 +77,10 @@ export const OwnerSalesScreen = () => {
               invoice={item}
               showSalesperson
               onPress={() => {
-                // Navigate to invoice detail
+                router.push({
+                  pathname: '/(owner)/invoice-details',
+                  params: { invoiceId: item.id }
+                });
               }}
             />
           )}

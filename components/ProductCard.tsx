@@ -28,7 +28,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <Text style={styles.code}>{product.code}</Text>
         </View>
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>UGX {product.price}</Text>
+          <Text style={styles.price}>UGX {parseFloat(product.price).toFixed(2)}</Text>
           {product.stock !== undefined && (
             <Text style={styles.stock}>Stock: {product.stock}</Text>
           )}

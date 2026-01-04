@@ -2,6 +2,7 @@
 import { Tabs, Redirect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '@/store/authStore';
+import { CartIconWithBadge } from '@/components/CartIconWithBadge';
 
 export default function SalespersonLayout() {
   const { user, isAuthenticated } = useAuthStore();
@@ -55,10 +56,10 @@ export default function SalespersonLayout() {
         options={{
           title: 'Cart',
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'cart' : 'cart-outline'}
-              size={size}
+            <CartIconWithBadge
               color={color}
+              size={size}
+              focused={focused}
             />
           ),
         }}
