@@ -65,6 +65,7 @@ export const SalespersonHomeScreen = () => {
               invoice={invoice}
               onPress={() => {
                 // Navigate to invoice detail
+                
               }}
             />
           ))

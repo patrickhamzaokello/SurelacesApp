@@ -1,18 +1,18 @@
 // src/screens/owner/SalesScreen.tsx
+import { isToday } from 'date-fns';
+import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
   ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useInvoicesStore } from '../../store/invoicesStore';
-import { InvoiceCard } from '../../components/InvoiceCard';
 import { EmptyState } from '../../components/EmptyState';
-import { isToday } from 'date-fns';
+import { InvoiceCard } from '../../components/InvoiceCard';
+import { useInvoicesStore } from '../../store/invoicesStore';
 
 type FilterType = 'all' | 'today';
 
@@ -77,10 +77,7 @@ export const OwnerSalesScreen = () => {
               invoice={item}
               showSalesperson
               onPress={() => {
-                router.push({
-                  pathname: '/(owner)/invoice-details',
-                  params: { invoiceId: item.id }
-                });
+               router.push(`/(owner)/sales/${item.id}`);
               }}
             />
           )}

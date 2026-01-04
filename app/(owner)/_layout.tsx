@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 export default function OwnerLayout() {
   const { user, isAuthenticated } = useAuthStore();
 
-  if (!isAuthenticated || user?.role !== 'owner') {
+  if (!isAuthenticated || user?.role !== 'owner' ) {
     return <Redirect href="/(auth)/login" />;
   }
 
@@ -22,6 +22,7 @@ export default function OwnerLayout() {
         headerTitleStyle: {
           fontWeight: '700',
         },
+        headerShown: false
       }}
     >
       <Tabs.Screen

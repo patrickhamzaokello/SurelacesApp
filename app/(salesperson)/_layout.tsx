@@ -23,6 +23,7 @@ export default function SalespersonLayout() {
         headerTitleStyle: {
           fontWeight: '700',
         },
+        headerShown: false
       }}
     >
       <Tabs.Screen
