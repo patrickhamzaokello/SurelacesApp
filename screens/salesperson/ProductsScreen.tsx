@@ -17,6 +17,7 @@ import { useCartStore } from '../../store/cartStore';
 import { EmptyState } from '../../components/EmptyState';
 import { Product } from '../../types';
 import { theme } from '../../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const ProductsScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -118,6 +119,7 @@ export const ProductsScreen = () => {
 
   return (
     <View style={styles.container}>
+      <SafeAreaView />
       <View style={styles.searchContainer}>
         <Text style={styles.screenTitle}>Products</Text>
         <View style={styles.searchInputContainer}>

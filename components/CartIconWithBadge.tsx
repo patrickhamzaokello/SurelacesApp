@@ -20,7 +20,7 @@ export const CartIconWithBadge: React.FC<CartIconWithBadgeProps> = ({ color, siz
   return (
     <View style={styles.container}>
       <Ionicons
-        name={focused ? 'cart' : 'cart-outline'}
+        name={focused ? 'bag' : 'bag-outline'}
         size={size}
         color={color}
       />

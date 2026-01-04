@@ -7,6 +7,7 @@ import { InvoiceCard } from '../../components/InvoiceCard';
 import { useAuth } from '../../hooks/useAuth';
 import { useInvoicesStore } from '../../store/invoicesStore';
 import { theme } from '../../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const SalespersonInvoicesScreen = () => {
   const router = useRouter();
@@ -49,6 +50,7 @@ export const SalespersonInvoicesScreen = () => {
 
   return (
     <View style={styles.container}>
+      <SafeAreaView />
       <View style={styles.header}>
         <Text style={styles.screenTitle}>Invoices</Text>
         <Text style={styles.invoiceCount}>{myInvoices.length} invoices</Text>
@@ -61,7 +63,7 @@ export const SalespersonInvoicesScreen = () => {
           <InvoiceCard
             invoice={item}
             onPress={() => {
-              router.push(`/(salesperson)/invoices/${item.id}`);
+              // router.push(`/(salesperson)/invoices/${item.id}`);
             }}
           />
         )}

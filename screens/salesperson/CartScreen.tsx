@@ -15,6 +15,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { EmptyState } from '../../components/EmptyState';
 import { InvoiceItem } from '../../types';
 import { theme } from '../../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const CartScreen = () => {
   const router = useRouter();
@@ -67,6 +68,7 @@ export const CartScreen = () => {
   if (items.length === 0) {
     return (
       <View style={styles.container}>
+        <SafeAreaView />  
         <View style={styles.header}>
           <Text style={styles.screenTitle}>Cart</Text>
         </View>
@@ -80,6 +82,7 @@ export const CartScreen = () => {
 
   return (
     <View style={styles.container}>
+      <SafeAreaView />
       <View style={styles.header}>
         <Text style={styles.screenTitle}>Cart</Text>
         <Text style={styles.itemCount}>{items.length} items</Text>

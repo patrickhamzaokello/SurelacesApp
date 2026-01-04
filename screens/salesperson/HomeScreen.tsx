@@ -9,6 +9,8 @@ import { SyncIndicator } from '../../components/SyncIndicator';
 import { InvoiceCard } from '../../components/InvoiceCard';
 import { EmptyState } from '../../components/EmptyState';
 import { theme } from '../../constants/theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 export const SalespersonHomeScreen = () => {
   const navigation = useNavigation();
@@ -18,6 +20,7 @@ export const SalespersonHomeScreen = () => {
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+      <SafeAreaView />
       {/* Header Section */}
       <View style={styles.header}>
         <View>
@@ -42,16 +45,16 @@ export const SalespersonHomeScreen = () => {
         )}
 
         {/* Quick Actions */}
-        <View style={styles.quickActions}>
+        <View style={[styles.quickActions,{ marginTop: theme.spacing.sm }]}>
           <TouchableOpacity
             style={styles.primaryAction}
-            onPress={() => navigation.navigate('Products' as never)}
+            onPress={() => router.push('(salesperson)/products' as never)}
           >
             <Text style={styles.primaryActionText}>New Sale</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.secondaryAction}
-            onPress={() => navigation.navigate('Invoices' as never)}
+            onPress={() => router.push('(salesperson)/invoices' as never)}
           >
             <Text style={styles.secondaryActionText}>View Invoices</Text>
           </TouchableOpacity>

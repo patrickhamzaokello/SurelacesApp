@@ -48,7 +48,7 @@ export default function SalespersonLayout() {
           title: 'Home',
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? 'home' : 'home-outline'}
+              name={focused ? 'grid' : 'grid-outline'}
               size={size}
               color={color}
             />
@@ -61,7 +61,7 @@ export default function SalespersonLayout() {
           title: 'Products',
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons
-              name={focused ? 'cube' : 'cube-outline'}
+              name={focused ? 'diamond' : 'diamond-outline'}
               size={size}
               color={color}
             />
