@@ -63,7 +63,7 @@ export const SalespersonInvoicesScreen = () => {
           <InvoiceCard
             invoice={item}
             onPress={() => {
-              // router.push(`/(salesperson)/invoices/${item.id}`);
+              router.push(`/(salesperson)/invoices/${item.id}`);
             }}
           />
         )}
