@@ -312,6 +312,7 @@ class ApiClient {
 
   async bulkSyncInvoices(data: { invoices: any[] }): Promise<BulkSyncResponse> {
     const response = await this.client.post('/pos/invoices/bulk-sync/', data);
+    console.log('Bulk sync response:', response.data);
     return response.data;
   }
 

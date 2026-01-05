@@ -1,10 +1,8 @@
 // src/store/invoicesStore.ts
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { apiClient } from '../api/apiClient';
 import { Invoice, InvoiceItem } from '../types';
-
-const INVOICES_KEY = 'local_invoices';
+import { InvoicesDBService } from '../database/services/InvoicesDBService';
 
 // Helper function to validate UUID format
 const isValidUUID = (str: string): boolean => {
@@ -29,15 +27,14 @@ interface InvoicesState {
   invoices: Invoice[];
   isLoading: boolean;
   error: string | null;
-  
+
+  loadInvoicesFromDB: (salespersonId?: string) => Promise<void>;
   createInvoice: (items: InvoiceItem[], userId: string, userName: string) => Promise<string>;
   fetchInvoices: (params?: any) => Promise<void>;
   syncPendingInvoices: () => Promise<void>;
   getInvoiceById: (id: string) => Invoice | undefined;
   getPendingInvoices: () => Invoice[];
-  loadLocalInvoices: () => Promise<void>;
-  saveLocalInvoices: () => Promise<void>;
-  clearInvalidInvoices: () => Promise<void>; // New method
+  clearInvalidInvoices: () => Promise<void>;
 }
 
 export const useInvoicesStore = create<InvoicesState>((set, get) => ({
@@ -45,29 +42,41 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
   isLoading: false,
   error: null,
 
+  // Load invoices from SQLite database
+  loadInvoicesFromDB: async (salespersonId?: string) => {
+    try {
+      const invoices = salespersonId
+        ? await InvoicesDBService.getInvoicesBySalesperson(salespersonId)
+        : await InvoicesDBService.getAllInvoices();
+
+      set({ invoices });
+    } catch (error: any) {
+      console.error('Failed to load invoices from DB:', error);
+    }
+  },
+
   createInvoice: async (items: InvoiceItem[], userId: string, userName: string) => {
     try {
       // Validate that we're getting proper UUIDs
       if (!isValidUUID(userId)) {
         throw new Error(`Invalid user ID format: ${userId}`);
       }
-      
+
       for (const item of items) {
         if (!isValidUUID(item.product)) {
           throw new Error(`Invalid product ID format: ${item.product}`);
         }
       }
-      
+
       const subtotal = items.reduce((sum, item) => sum + (item.total ? parseFloat(item.total) : 0), 0);
       const tax = subtotal * 0.1;
       const total = subtotal + tax;
 
-      const invoice: Invoice = {
-        id: `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      const invoice: Omit<Invoice, 'id' | 'item_count'> = {
         invoice_number: `INV-${Date.now()}`,
-        salesperson: userId, // This MUST be UUID
+        salesperson: userId,
         salesperson_name: userName,
-        items, // Items MUST have product as UUID
+        items,
         subtotal: subtotal.toString(),
         tax: tax.toString(),
         total: total.toString(),
@@ -75,20 +84,20 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
         sync_status: 'PENDING',
       };
 
+      // Save to SQLite (transactional - invoice + items)
+      const invoiceId = await InvoicesDBService.createInvoice(invoice, items);
 
-      set(state => ({
-        invoices: [invoice, ...state.invoices],
-      }));
-
-      await get().saveLocalInvoices();
+      // Update in-memory state
+      await get().loadInvoicesFromDB(userId);
 
       // Try to sync immediately if online
       try {
         await get().syncPendingInvoices();
       } catch (syncError) {
+        // Sync failure is okay, will retry later
       }
 
-      return invoice.id;
+      return invoiceId;
     } catch (error: any) {
       set({ error: error.message || 'Failed to create invoice' });
       throw error;
@@ -98,121 +107,125 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
   fetchInvoices: async (params?: any) => {
     try {
       set({ isLoading: true, error: null });
-      
+
       const response = await apiClient.getInvoices(params);
       const fetchedInvoices = response.results;
-      
-      const currentInvoices = get().invoices;
-      const pendingInvoices = currentInvoices.filter(inv => inv.sync_status === 'PENDING');
-      const fetchedMap = new Map(fetchedInvoices.map((inv: { invoice_number: any; }) => [inv.invoice_number, inv]));
-      
-      const stillPendingInvoices = pendingInvoices.filter(
-        inv => !fetchedMap.has(inv.invoice_number)
-      );
-      
-      const mergedInvoices = [
-        ...stillPendingInvoices,
-        ...fetchedInvoices,
-      ];
-      
+
+      // Get pending invoices from DB
+      const pendingInvoices = await InvoicesDBService.getPendingInvoices();
+      const fetchedMap = new Map(fetchedInvoices.map((inv: { invoice_number: any }) => [inv.invoice_number, inv]));
+
+      const stillPendingInvoices = pendingInvoices.filter(inv => !fetchedMap.has(inv.invoice_number));
+
+      const mergedInvoices = [...stillPendingInvoices, ...fetchedInvoices];
+
       set({
         invoices: mergedInvoices,
         isLoading: false,
       });
-
-      await get().saveLocalInvoices();
     } catch (error: any) {
       set({
         error: error.response?.data?.detail || error.message || 'Failed to fetch invoices',
         isLoading: false,
       });
-      
-      await get().loadLocalInvoices();
+
+      // Fallback to loading from local DB
+      const salespersonId = params?.salespersonId;
+      await get().loadInvoicesFromDB(salespersonId);
     }
   },
 
   syncPendingInvoices: async () => {
-    const pendingInvoices = get().getPendingInvoices();
-    
+    const pendingInvoices = await InvoicesDBService.getPendingInvoices();
+
     if (pendingInvoices.length === 0) {
       return;
     }
 
-
     // Filter out invalid invoices
     const validInvoices = pendingInvoices.filter(validateInvoiceForSync);
     const invalidCount = pendingInvoices.length - validInvoices.length;
-    
+
     if (invalidCount > 0) {
+      console.warn(`${invalidCount} invoice(s) have invalid UUIDs and will not be synced`);
     }
-    
+
     if (validInvoices.length === 0) {
       throw new Error('No valid invoices to sync. All invoices have invalid UUIDs.');
     }
 
     try {
-      // Format invoices for bulk sync endpoint
-      const formattedInvoices = validInvoices.map(invoice => {
-        
-        return {
-          id: invoice.id,
-          createdAt: invoice.created_at,
-          invoice_number: invoice.invoice_number,
-          salesperson: invoice.salesperson, // Must be UUID!
-          salespersonName: invoice.salesperson_name,
-          subtotal: invoice.subtotal,
-          tax: invoice.tax,
-          total: invoice.total,
-          customer_name: invoice.customer_name,
-          customer_phone: invoice.customer_phone,
-          customer_email: invoice.customer_email,
-          notes: invoice.notes,
-          syncStatus: invoice.sync_status,
-          items: invoice.items.map(item => ({
-            product: item.product, // Must be UUID!
-            product_name: item.product_name,
-            product_code: item.product_code,
-            quantity: item.quantity,
-            price: item.price,
-            total: item.total,
-          })),
-        };
-      });
+      // Format invoices for bulk sync endpoint - MUST match API spec exactly
+      const formattedInvoices = validInvoices.map(invoice => ({
+        id: invoice.id,
+        invoice_number: invoice.invoice_number,
+        salesperson: invoice.salesperson,
+        salespersonName: invoice.salesperson_name,
+        createdAt: invoice.created_at,
+        subtotal: invoice.subtotal,
+        tax: invoice.tax,
+        discount: invoice.discount || "0.00",  // API expects string, not null
+        total: invoice.total,
+        customer_name: invoice.customer_name || "",  // API expects empty string, not null
+        customer_phone: invoice.customer_phone || "",
+        notes: invoice.notes || "",  // API expects empty string, not null
+        syncStatus: invoice.sync_status,
+        items: invoice.items.map(item => ({
+          product: item.product,
+          product_name: item.product_name,
+          product_code: item.product_code,
+          quantity: item.quantity,
+          price: item.price,
+          total: item.total,
+        })),
+      }));
+
+      console.log(`Syncing ${formattedInvoices.length} invoice(s) to server...`);
+      console.log('First invoice data:', JSON.stringify(formattedInvoices[0], null, 2));
 
       const response = await apiClient.bulkSyncInvoices({ invoices: formattedInvoices });
 
-      
       if (response.failed > 0) {
+        console.warn(`${response.failed} invoice(s) failed to sync`);
       }
 
+      // Get successfully synced invoice numbers
       const failedInvoiceNumbers = new Set(
-        response.failed_invoices?.map((f: { invoice_number: any; }) => f.invoice_number) || []
+        response.failed_invoices?.map((f: { invoice_number: any }) => f.invoice_number) || []
       );
 
-      set(state => ({
-        invoices: state.invoices.map(inv => {
-          if (inv.sync_status === 'PENDING' && !failedInvoiceNumbers.has(inv.invoice_number)) {
-            return {
-              ...inv,
-              sync_status: 'SYNCED',
-              synced_at: new Date().toISOString(),
-            };
-          }
-          return inv;
-        }),
-      }));
+      const successfulInvoiceNumbers = validInvoices
+        .filter(inv => !failedInvoiceNumbers.has(inv.invoice_number))
+        .map(inv => inv.invoice_number);
 
-      await get().saveLocalInvoices();
-      
+      // Update sync status in database
+      if (successfulInvoiceNumbers.length > 0) {
+        await InvoicesDBService.bulkUpdateSyncStatus(successfulInvoiceNumbers);
+      }
+
+      // Reload invoices from DB to reflect updated sync status
+      const currentInvoices = get().invoices;
+      const salespersonId = currentInvoices[0]?.salesperson;
+      await get().loadInvoicesFromDB(salespersonId);
+
       if (response.failed > 0) {
         const errorMessage = response.failed_invoices
-          ?.map((f: { invoice_number: any; errors: any; }) => `${f.invoice_number}: ${JSON.stringify(f.errors)}`)
+          ?.map((f: { invoice_number: any; errors: any }) => `${f.invoice_number}: ${JSON.stringify(f.errors)}`)
           .join('\n');
         throw new Error(`${response.failed} invoice(s) failed to sync:\n${errorMessage}`);
       }
-      
     } catch (error: any) {
-      throw error;
+      console.error('Sync failed with error:', error);
+      console.error('Error response:', error.response?.data);
+      console.error('Error status:', error.response?.status);
+
+      // Provide more detailed error message
+      const errorDetails = error.response?.data?.detail ||
+                          error.response?.data?.message ||
+                          error.message ||
+                          'Unknown error';
+
+      throw new Error(`Invoice sync failed: ${errorDetails}`);
     }
   },
 
@@ -224,42 +237,23 @@ export const useInvoicesStore = create<InvoicesState>((set, get) => ({
     return get().invoices.filter(invoice => invoice.sync_status === 'PENDING');
   },
 
-  loadLocalInvoices: async () => {
-    try {
-      const data = await AsyncStorage.getItem(INVOICES_KEY);
-      if (data) {
-        const invoices = JSON.parse(data);
-        set({ invoices });
-        
-        // Log any invoices with invalid format
-        const invalidInvoices = invoices.filter((inv: Invoice) => !validateInvoiceForSync(inv));
-        if (invalidInvoices.length > 0) {
-        }
-      }
-    } catch (error) {
-      await AsyncStorage.removeItem('local_invoices');
-    }
-  },
-
-  saveLocalInvoices: async () => {
-    try {
-      const invoices = get().invoices;
-      await AsyncStorage.setItem(INVOICES_KEY, JSON.stringify(invoices));
-    } catch (error) {
-    }
-  },
-
   clearInvalidInvoices: async () => {
     try {
       const currentInvoices = get().invoices;
-      const validInvoices = currentInvoices.filter(validateInvoiceForSync);
-      const removedCount = currentInvoices.length - validInvoices.length;
-      
-      set({ invoices: validInvoices });
-      await get().saveLocalInvoices();
-      
-      return;
+      const invalidInvoices = currentInvoices.filter(inv => !validateInvoiceForSync(inv));
+
+      // Delete invalid invoices from database
+      for (const inv of invalidInvoices) {
+        await InvoicesDBService.deleteInvoice(inv.id);
+      }
+
+      // Reload from DB
+      const salespersonId = currentInvoices[0]?.salesperson;
+      await get().loadInvoicesFromDB(salespersonId);
+
+      console.log(`Removed ${invalidInvoices.length} invalid invoice(s)`);
     } catch (error) {
+      console.error('Failed to clear invalid invoices:', error);
     }
-  }
+  },
 }));

@@ -64,7 +64,7 @@ export const InvoiceCard: React.FC<InvoiceCardProps> = ({
         <Text style={styles.itemsCount}>
           {invoice.items.length} item{invoice.items.length !== 1 ? 's' : ''}
         </Text>
-        <Text style={styles.total}>UGX {parseFloat(invoice.total).toFixed(2)}</Text>
+        <Text style={styles.total}>UGX {(parseInt(invoice.total) / 1000).toFixed(0)}K</Text>
       </View>
     </TouchableOpacity>
   );

@@ -33,11 +33,14 @@ export const useSyncStore = create<SyncStoreState>((set, get) => ({
       const invoicesStore = useInvoicesStore.getState();
       const productsStore = useProductsStore.getState();
 
+      console.log('Starting sync process...');
+
       // 1. First, sync pending invoices
       try {
         await invoicesStore.syncPendingInvoices();
       } catch (error) {
         // Don't throw - continue with other sync operations
+        console.log('Error syncing pending invoices:', error);
       }
 
       // 2. Fetch latest products

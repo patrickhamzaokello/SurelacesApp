@@ -14,6 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useProductsStore } from '../../store/productsStore';
 import { useCartStore } from '../../store/cartStore';
+import { ProductModal } from '../../components/ProductModal';
 import { EmptyState } from '../../components/EmptyState';
 import { Product } from '../../types';
 import { theme } from '../../constants/theme';
@@ -24,37 +25,65 @@ export const ProductsScreen = () => {
   const { products, isLoading, fetchProducts, searchProducts } = useProductsStore();
   const { addItem } = useCartStore();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
+  // Async search handler
   useEffect(() => {
-    const results = searchProducts(searchQuery);
-    setFilteredProducts(results);
+    let cancelled = false;
+
+    const performSearch = async () => {
+      setIsSearching(true);
+      try {
+        const results = await searchProducts(searchQuery);
+        if (!cancelled) {
+          setFilteredProducts(results);
+        }
+      } catch (error) {
+        console.error('Search failed:', error);
+      } finally {
+        if (!cancelled) {
+          setIsSearching(false);
+        }
+      }
+    };
+
+    performSearch();
+
+    return () => {
+      cancelled = true;
+    };
   }, [searchQuery, products]);
 
-  const handleAddToCart = (product: Product, event: any) => {
+  const handleAddToCart = async (product: Product, event: any) => {
     event.stopPropagation();
-    addItem(product);
-    Alert.alert('Added to Cart', `${product.name} added to cart`);
+    try {
+      await addItem(product);
+      Alert.alert('Added to Cart', `${product.name} added to cart`);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+      Alert.alert('Error', 'Failed to add item to cart');
+    }
   };
 
   const handleProductPress = (product: Product) => {
-    Alert.alert(
-      product.name,
-      `Code: ${product.code}\nPrice: UGX ${parseFloat(product.price).toFixed(0)}${
-        product.stock !== undefined ? `\nStock: ${product.stock}` : ''
-      }${product.category_name ? `\nCategory: ${product.category_name}` : ''}`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Add to Cart', 
-          onPress: () => addItem(product),
-          style: 'default'
-        }
-      ]
-    );
+    setSelectedProduct(product);
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedProduct(null);
+  };
+
+  // Dummy save handler for salesperson (read-only, shouldn't be called)
+  const handleSaveProduct = async () => {
+    // This won't be called since isEditable is false
   };
 
   const renderProductItem = ({ item }: { item: Product }) => (
@@ -164,6 +193,15 @@ export const ProductsScreen = () => {
           ItemSeparatorComponent={() => <View style={styles.separator} />}
         />
       )}
+
+      {/* Product Modal (Read-only for salesperson) */}
+      <ProductModal
+        visible={isModalVisible}
+        product={selectedProduct}
+        isEditable={false}
+        onClose={handleCloseModal}
+        onSave={handleSaveProduct}
+      />
     </View>
   );
 };

@@ -1,9 +1,10 @@
 // src/store/authStore.ts
 import { create } from 'zustand';
 import { apiClient } from '../api/apiClient';
-import { AuthTokens, User } from '../types'; // Assuming you moved AuthTokens to types.ts or keep it here
+import { AuthTokens, User } from '../types';
 import { secureStorage } from '../utils/secureStorage';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { dbManager } from '../database/index';
+import { useSyncStore } from './syncStore';
 
 // Simple JWT decode (only for exp claim, no verification)
 const decodeJwtExp = (token: string): number | null => {
@@ -90,6 +91,11 @@ login: async (email: string, password: string) => {
       error: null,
     });
 
+    // Trigger initial sync (non-blocking)
+    setTimeout(() => {
+      useSyncStore.getState().startInitialSync();
+    }, 500);
+
     return user; // Return the user object
   } catch (error: any) {
     const message =
@@ -108,14 +114,32 @@ login: async (email: string, password: string) => {
 },
 
   logout: async () => {
-    await secureStorage.clearAll();
-    await AsyncStorage.removeItem('local_invoices');
-    set({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
-    });
+    try {
+      // 1. Clear database FIRST (most important)
+      await dbManager.clearAllData();
+
+      // 2. Clear secure storage (tokens, user data)
+      await secureStorage.clearAll();
+
+      // 3. Reset store state
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      });
+
+      console.log('Logout completed successfully');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Still reset state even if clearing fails
+      set({
+        user: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      });
+    }
   },
 
   loadStoredAuth: async () => {

@@ -20,11 +20,23 @@ type FilterType = 'all' | 'today';
 
 export const OwnerSalesScreen = () => {
   const router = useRouter();
-  const { invoices, isLoading, fetchInvoices } = useInvoicesStore();
+  const { invoices, isLoading, fetchInvoices, loadInvoicesFromDB } = useInvoicesStore();
   const [filter, setFilter] = useState<FilterType>('today');
 
   useEffect(() => {
-    fetchInvoices();
+    const loadInvoices = async () => {
+      // Load from SQLite database first (instant, offline-ready)
+      await loadInvoicesFromDB();
+
+      // Then try to fetch from server
+      try {
+        await fetchInvoices();
+      } catch (error) {
+        console.error('Failed to fetch invoices from server:', error);
+      }
+    };
+
+    loadInvoices();
   }, []);
 
   const filteredInvoices = filter === 'today'

@@ -20,11 +20,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export const CartScreen = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const { items, removeItem, updateQuantity, clearCart, getSubtotal, getTax, getTotal } =
-    useCartStore();
+  const { items, removeItem, updateQuantity, clearCart } = useCartStore();
   const { createInvoice } = useInvoicesStore();
 
   const taxRate = 0.1; // 10% tax
+
+  // Calculate totals based on current items (reactive to state changes)
+  const subtotal = items.reduce(
+    (total, item) => total + parseFloat(item.product.price) * item.quantity,
+    0
+  );
+  const tax = subtotal * taxRate;
+  const total = subtotal + tax;
 
   const handleCreateInvoice = async () => {
     if (items.length === 0) {
@@ -51,12 +58,13 @@ export const CartScreen = () => {
               }));
 
               await createInvoice(invoiceItems, user!.user_id, user!.name);
-              clearCart();
-              
+              await clearCart();
+
               Alert.alert('Success', 'Invoice created successfully', [
                 { text: 'OK', onPress: () => router.push('/(salesperson)/invoices') },
               ]);
             } catch (error) {
+              console.error('Failed to create invoice:', error);
               Alert.alert('Error', 'Failed to create invoice');
             }
           },
@@ -105,14 +113,26 @@ export const CartScreen = () => {
             <View style={styles.quantityContainer}>
               <TouchableOpacity
                 style={styles.quantityButton}
-                onPress={() => updateQuantity(item.product.id, item.quantity - 1)}
+                onPress={async () => {
+                  try {
+                    await updateQuantity(item.product.id, item.quantity - 1);
+                  } catch (error) {
+                    console.error('Failed to update quantity:', error);
+                  }
+                }}
               >
                 <Text style={styles.quantityButtonText}>−</Text>
               </TouchableOpacity>
               <Text style={styles.quantity}>{item.quantity}</Text>
               <TouchableOpacity
                 style={styles.quantityButton}
-                onPress={() => updateQuantity(item.product.id, item.quantity + 1)}
+                onPress={async () => {
+                  try {
+                    await updateQuantity(item.product.id, item.quantity + 1);
+                  } catch (error) {
+                    console.error('Failed to update quantity:', error);
+                  }
+                }}
               >
                 <Text style={styles.quantityButtonText}>+</Text>
               </TouchableOpacity>
@@ -123,7 +143,13 @@ export const CartScreen = () => {
               </Text>
               <TouchableOpacity
                 style={styles.removeButton}
-                onPress={() => removeItem(item.product.id)}
+                onPress={async () => {
+                  try {
+                    await removeItem(item.product.id);
+                  } catch (error) {
+                    console.error('Failed to remove item:', error);
+                  }
+                }}
               >
                 <Text style={styles.removeButtonText}>Remove</Text>
               </TouchableOpacity>
@@ -138,15 +164,15 @@ export const CartScreen = () => {
         <View style={styles.totals}>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Subtotal</Text>
-            <Text style={styles.totalValue}>UGX {getSubtotal().toFixed(0)}</Text>
+            <Text style={styles.totalValue}>UGX {subtotal.toFixed(0)}</Text>
           </View>
           <View style={styles.totalRow}>
             <Text style={styles.totalLabel}>Tax (10%)</Text>
-            <Text style={styles.totalValue}>UGX {getTax(taxRate).toFixed(0)}</Text>
+            <Text style={styles.totalValue}>UGX {tax.toFixed(0)}</Text>
           </View>
           <View style={[styles.totalRow, styles.grandTotal]}>
             <Text style={styles.grandTotalLabel}>Total</Text>
-            <Text style={styles.grandTotalValue}>UGX {getTotal(taxRate).toFixed(0)}</Text>
+            <Text style={styles.grandTotalValue}>UGX {total.toFixed(0)}</Text>
           </View>
         </View>
 
@@ -162,7 +188,17 @@ export const CartScreen = () => {
           onPress={() => {
             Alert.alert('Clear Cart', 'Remove all items from cart?', [
               { text: 'Cancel', style: 'cancel' },
-              { text: 'Clear', onPress: clearCart, style: 'destructive' },
+              {
+                text: 'Clear',
+                onPress: async () => {
+                  try {
+                    await clearCart();
+                  } catch (error) {
+                    console.error('Failed to clear cart:', error);
+                  }
+                },
+                style: 'destructive'
+              },
             ]);
           }}
         >

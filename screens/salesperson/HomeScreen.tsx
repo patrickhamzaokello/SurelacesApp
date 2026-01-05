@@ -65,12 +65,12 @@ export const SalespersonHomeScreen = () => {
           <Text style={styles.sectionTitle}>Today's Performance</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>UGX {stats.totalSales.toFixed(0)}</Text>
-              <Text style={styles.statLabel}>Total Sales</Text>
+            <Text style={styles.statValue}>UGX {(stats.totalSales / 1000).toFixed(0)}K</Text>
+              <Text style={styles.statLabel}>Total Revenue</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>{stats.invoiceCount}</Text>
-              <Text style={styles.statLabel}>Invoices</Text>
+              <Text style={styles.statLabel}>Sales Today</Text>
             </View>
           </View>
         </View>
@@ -80,7 +80,7 @@ export const SalespersonHomeScreen = () => {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recent Activity</Text>
             {stats.recentInvoices.length > 0 && (
-              <TouchableOpacity onPress={() => navigation.navigate('Invoices' as never)}>
+              <TouchableOpacity onPress={() => router.push('(salesperson)/invoices' as never)}>
                 <Text style={styles.viewAllText}>View All</Text>
               </TouchableOpacity>
             )}
@@ -98,7 +98,7 @@ export const SalespersonHomeScreen = () => {
                   key={invoice.id}
                   invoice={invoice}
                   onPress={() => {
-                    // Navigate to invoice detail
+                    router.push(`/(salesperson)/invoices/${invoice.id}`);
                   }}
                 />
               ))}

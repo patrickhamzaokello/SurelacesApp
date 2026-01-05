@@ -1,6 +1,6 @@
 // src/hooks/useSync.ts
 import { useEffect } from 'react';
-import { useSyncStore } from '@/store/synStore';
+import { useSyncStore } from '@/store/syncStore';
 import { useInvoicesStore } from '@/store/invoicesStore';
 
 export const useSync = () => {

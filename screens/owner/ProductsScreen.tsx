@@ -13,6 +13,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useProductsStore } from '../../store/productsStore';
 import { ProductCard } from '../../components/ProductCard';
+import { ProductModal } from '../../components/ProductModal';
 import { EmptyState } from '../../components/EmptyState';
 import { Product } from '../../types';
 import { format } from 'date-fns';
@@ -21,16 +22,41 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export const OwnerProductsScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const { products, isLoading, lastUpdated, fetchProducts, searchProducts } = useProductsStore();
+  const { products, isLoading, lastUpdated, fetchProducts, searchProducts, createProduct, updateProduct } = useProductsStore();
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
+  // Async search handler
   useEffect(() => {
-    const results = searchProducts(searchQuery);
-    setFilteredProducts(results);
+    let cancelled = false;
+
+    const performSearch = async () => {
+      setIsSearching(true);
+      try {
+        const results = await searchProducts(searchQuery);
+        if (!cancelled) {
+          setFilteredProducts(results);
+        }
+      } catch (error) {
+        console.error('Search failed:', error);
+      } finally {
+        if (!cancelled) {
+          setIsSearching(false);
+        }
+      }
+    };
+
+    performSearch();
+
+    return () => {
+      cancelled = true;
+    };
   }, [searchQuery, products]);
 
   const handleRefresh = async () => {
@@ -43,13 +69,30 @@ export const OwnerProductsScreen = () => {
   };
 
   const handleProductPress = (product: Product) => {
-    Alert.alert(
-      product.name,
-      `Code: ${product.code}\nPrice: UGX ${parseFloat(product.price).toFixed(0)}${
-        product.stock !== undefined ? `\nStock: ${product.stock}` : ''
-      }${product.category_name ? `\nCategory: ${product.category_name}` : ''}`,
-      [{ text: 'OK' }]
-    );
+    setSelectedProduct(product);
+    setIsModalVisible(true);
+  };
+
+  const handleAddProduct = () => {
+    setSelectedProduct(null);
+    setIsModalVisible(true);
+  };
+
+  const handleSaveProduct = async (data: Partial<Product>) => {
+    if (selectedProduct) {
+      // Update existing product
+      await updateProduct(selectedProduct.id, data);
+    } else {
+      // Create new product
+      await createProduct(data);
+    }
+    // Refresh the product list
+    await fetchProducts();
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedProduct(null);
   };
 
   if (isLoading && products.length === 0) {
@@ -84,7 +127,7 @@ export const OwnerProductsScreen = () => {
             autoCorrect={false}
           />
           {searchQuery.length > 0 && (
-            <TouchableOpacity 
+            <TouchableOpacity
               onPress={() => setSearchQuery('')}
               style={styles.clearButton}
             >
@@ -92,28 +135,45 @@ export const OwnerProductsScreen = () => {
             </TouchableOpacity>
           )}
         </View>
-        
-        {lastUpdated && (
-          <Text style={styles.lastUpdated}>
-            Last updated: {format(new Date(lastUpdated), 'h:mm a')}
-          </Text>
-        )}
-        
-        <TouchableOpacity
-          style={styles.refreshButton}
-          onPress={handleRefresh}
-          disabled={isLoading}
-        >
-          <Ionicons 
-            name={isLoading ? "refresh" : "refresh-outline"} 
-            size={18} 
-            color={theme.colors.white} 
-            style={styles.refreshIcon}
-          />
-          <Text style={styles.refreshButtonText}>
-            {isLoading ? 'Updating...' : 'Update Products'}
-          </Text>
-        </TouchableOpacity>
+
+        <View style={styles.buttonRow}>
+          {lastUpdated && (
+            <Text style={styles.lastUpdated}>
+              Last updated: {format(new Date(lastUpdated), 'h:mm a')}
+            </Text>
+          )}
+        </View>
+
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleAddProduct}
+          >
+            <Ionicons
+              name="add-circle-outline"
+              size={18}
+              color={theme.colors.white}
+              style={styles.buttonIcon}
+            />
+            <Text style={styles.addButtonText}>Add Product</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.refreshButton}
+            onPress={handleRefresh}
+            disabled={isLoading}
+          >
+            <Ionicons
+              name={isLoading ? "refresh" : "refresh-outline"}
+              size={18}
+              color={theme.colors.white}
+              style={styles.buttonIcon}
+            />
+            <Text style={styles.refreshButtonText}>
+              {isLoading ? 'Updating...' : 'Update'}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Products List */}
@@ -140,6 +200,15 @@ export const OwnerProductsScreen = () => {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      {/* Product Modal */}
+      <ProductModal
+        visible={isModalVisible}
+        product={selectedProduct}
+        isEditable={true}
+        onClose={handleCloseModal}
+        onSave={handleSaveProduct}
+      />
     </View>
   );
 };
@@ -209,9 +278,14 @@ const styles = StyleSheet.create({
     fontSize: theme.typography.sizes.xs,
     color: theme.colors.gray500,
     marginBottom: theme.spacing.sm,
-    textAlign: 'center',
   },
-  refreshButton: {
+  buttonRow: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+    marginBottom: theme.spacing.sm,
+  },
+  addButton: {
+    flex: 1,
     backgroundColor: theme.colors.primary,
     padding: theme.spacing.md,
     borderRadius: theme.borderRadius.md,
@@ -219,8 +293,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
   },
-  refreshIcon: {
-    marginRight: theme.spacing.sm,
+  addButtonText: {
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.semibold,
+    color: theme.colors.white,
+  },
+  refreshButton: {
+    flex: 1,
+    backgroundColor: theme.colors.gray600,
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+  },
+  buttonIcon: {
+    marginRight: theme.spacing.xs,
   },
   refreshButtonText: {
     fontSize: theme.typography.sizes.sm,

@@ -12,19 +12,30 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export const SalespersonInvoicesScreen = () => {
   const router = useRouter();
   const { user } = useAuth();
-  const { invoices, isLoading, fetchInvoices, loadLocalInvoices } = useInvoicesStore();
+  const { invoices, isLoading, fetchInvoices, loadInvoicesFromDB } = useInvoicesStore();
 
   const myInvoices = invoices.filter(
     (invoice) => invoice.salesperson === user?.user_id
   );
-  
+
   useEffect(() => {
-    // Load local invoices first (instant)
-    loadLocalInvoices();
-    
-    // Then try to fetch from server (will merge with local)
-    fetchInvoices({ salespersonId: user?.user_id });
-  }, []);
+    const loadInvoices = async () => {
+      if (!user?.user_id) return;
+
+      // Load from SQLite database first (instant, offline-ready)
+      await loadInvoicesFromDB(user.user_id);
+
+      // Then try to fetch from server (will merge with local pending invoices)
+      try {
+        await fetchInvoices({ salespersonId: user.user_id });
+      } catch (error) {
+        console.error('Failed to fetch invoices from server:', error);
+        // Already have local data, so this is okay
+      }
+    };
+
+    loadInvoices();
+  }, [user?.user_id]);
 
   if (isLoading && invoices.length === 0) {
     return (

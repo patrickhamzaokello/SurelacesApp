@@ -41,8 +41,41 @@ export const InvoiceDetailsScreen = () => {
 
   const handleShare = async () => {
     try {
+      const invoiceText = `
+━━━━━━━━━━━━━━━━━━━━━━━━━
+       INVOICE
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Invoice: ${invoice.invoice_number}
+Date: ${format(new Date(invoice.created_at), 'MMM dd, yyyy h:mm a')}
+Salesperson: ${invoice.salesperson_name}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+ITEMS
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+${invoice.items.map((item: InvoiceItem, i: number) =>
+  `${i + 1}. ${item.product_name}
+   Code: ${item.product_code}
+   ${item.quantity}x @ UGX ${parseFloat(item.price).toFixed(0)}
+   Total: UGX ${item.total ? parseFloat(item.total).toFixed(0) : (parseFloat(item.price) * item.quantity).toFixed(0)}`
+).join('\n\n')}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Subtotal: UGX ${parseFloat(invoice.subtotal).toFixed(0)}
+Tax: UGX ${parseFloat(invoice.tax).toFixed(0)}
+${invoice.discount && parseFloat(invoice.discount) > 0 ? `Discount: -UGX ${parseFloat(invoice.discount).toFixed(0)}` : ''}
+TOTAL: UGX ${parseFloat(invoice.total).toFixed(0)}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+Thank you for your business!
+      `;
+
       await Share.share({
-        message: `Invoice ${invoice.invoice_number}\nTotal: UGX ${parseFloat(invoice.total).toFixed(0)}\nDate: ${format(new Date(invoice.created_at), 'MMM d, yyyy')}`,
+        message: invoiceText.trim(),
         title: `Invoice ${invoice.invoice_number}`,
       });
     } catch (error) {
@@ -50,19 +83,11 @@ export const InvoiceDetailsScreen = () => {
     }
   };
 
-  const handleExport = async () => {
+  const handleSavePDF = async () => {
     Alert.alert(
-      'Export Invoice',
-      'Export functionality will be available in a future update with screenshot capabilities.',
-      [{ text: 'OK' }]
-    );
-  };
-
-  const handlePrint = async () => {
-    Alert.alert(
-      'Print Invoice',
-      'Print functionality will be available with printer integration in a future update.',
-      [{ text: 'OK' }]
+      'Save as PDF',
+      'PDF export functionality will be available in a future update.',
+      [{ text: 'Got it' }]
     );
   };
 
@@ -94,94 +119,125 @@ export const InvoiceDetailsScreen = () => {
 
   return (
     <View style={styles.container}>
-       <SafeAreaView />
+      <SafeAreaView />
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.headerButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color={theme.colors.black} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Invoice Details</Text>
-        <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerButton} onPress={handleShare}>
-            <Ionicons name="share-outline" size={24} color={theme.colors.gray600} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={handleExport}>
-            <Ionicons name="download-outline" size={24} color={theme.colors.gray600} />
-          </TouchableOpacity>
-        </View>
+      
+<View style={styles.header}>
+        <Text style={styles.screenTitle}>Inovice Details</Text>
       </View>
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Invoice Header */}
-        <View style={styles.invoiceHeader}>
-          <View style={styles.headerInfo}>
+        {/* Invoice Header Card */}
+        <View style={styles.invoiceHeaderCard}>
+          <View style={styles.invoiceNumberSection}>
+            <Text style={styles.invoiceNumberLabel}>Invoice Number</Text>
             <Text style={styles.invoiceNumber}>{invoice.invoice_number}</Text>
-            <Text style={styles.invoiceDate}>
-              {format(new Date(invoice.created_at), 'MMM d, yyyy • h:mm a')}
-            </Text>
           </View>
-          <View style={[styles.statusBadge, { backgroundColor: getStatusStyle(invoice.sync_status) }]}>
-            <Text style={styles.statusText}>{getStatusLabel(invoice.sync_status)}</Text>
+
+          <View style={styles.invoiceMeta}>
+            <View style={styles.metaItem}>
+              <Ionicons name="calendar-outline" size={16} color={theme.colors.gray500} />
+              <Text style={styles.metaText}>
+                {format(new Date(invoice.created_at), 'MMM dd, yyyy')}
+              </Text>
+            </View>
+            <View style={styles.metaItem}>
+              <Ionicons name="time-outline" size={16} color={theme.colors.gray500} />
+              <Text style={styles.metaText}>
+                {format(new Date(invoice.created_at), 'h:mm a')}
+              </Text>
+            </View>
+          </View>
+
+          <View style={[styles.statusBadge, { backgroundColor: getStatusStyle(invoice.sync_status) + '20', borderColor: getStatusStyle(invoice.sync_status) }]}>
+            <View style={[styles.statusDot, { backgroundColor: getStatusStyle(invoice.sync_status) }]} />
+            <Text style={[styles.statusText, { color: getStatusStyle(invoice.sync_status) }]}>
+              {getStatusLabel(invoice.sync_status)}
+            </Text>
           </View>
         </View>
 
         {/* Main Content */}
         <View style={styles.content}>
-          {/* Basic Info Grid */}
-          <View style={styles.infoGrid}>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Store</Text>
-              <Text style={styles.infoValue}>{invoice.store_name || 'Surelaces'}</Text>
+          {/* Info Card */}
+          <View style={styles.infoCard}>
+            <Text style={styles.cardTitle}>Details</Text>
+            <View style={styles.infoRow}>
+              <Ionicons name="person-outline" size={18} color={theme.colors.gray600} />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Salesperson</Text>
+                <Text style={styles.infoValue}>{invoice.salesperson_name}</Text>
+              </View>
             </View>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Salesperson</Text>
-              <Text style={styles.infoValue}>{invoice.salesperson_name}</Text>
+            <View style={styles.infoRow}>
+              <Ionicons name="storefront-outline" size={18} color={theme.colors.gray600} />
+              <View style={styles.infoContent}>
+                <Text style={styles.infoLabel}>Store</Text>
+                <Text style={styles.infoValue}>{invoice.store_name || 'Surelaces'}</Text>
+              </View>
             </View>
           </View>
 
           {/* Customer Info (if available) */}
           {(invoice.customer_name || invoice.customer_phone || invoice.customer_email) && (
-            <View style={styles.customerSection}>
-              <Text style={styles.sectionTitle}>Customer</Text>
-              <View style={styles.customerDetails}>
-                {invoice.customer_name && <Text style={styles.customerText}>{invoice.customer_name}</Text>}
-                {invoice.customer_phone && <Text style={styles.customerText}>{invoice.customer_phone}</Text>}
-                {invoice.customer_email && <Text style={styles.customerText}>{invoice.customer_email}</Text>}
-              </View>
+            <View style={styles.infoCard}>
+              <Text style={styles.cardTitle}>Customer</Text>
+              {invoice.customer_name && (
+                <View style={styles.infoRow}>
+                  <Ionicons name="person" size={18} color={theme.colors.gray600} />
+                  <Text style={styles.infoValue}>{invoice.customer_name}</Text>
+                </View>
+              )}
+              {invoice.customer_phone && (
+                <View style={styles.infoRow}>
+                  <Ionicons name="call" size={18} color={theme.colors.gray600} />
+                  <Text style={styles.infoValue}>{invoice.customer_phone}</Text>
+                </View>
+              )}
+              {invoice.customer_email && (
+                <View style={styles.infoRow}>
+                  <Ionicons name="mail" size={18} color={theme.colors.gray600} />
+                  <Text style={styles.infoValue}>{invoice.customer_email}</Text>
+                </View>
+              )}
             </View>
           )}
 
-          {/* Items */}
-          <View style={styles.itemsSection}>
-            <Text style={styles.sectionTitle}>Items ({invoice.items.length})</Text>
-            <View style={styles.itemsList}>
-              {invoice.items.map((item: InvoiceItem, index: number) => (
-                <View key={index} style={styles.itemRow}>
-                  <View style={styles.itemLeft}>
-                    <Text style={styles.itemName}>{item.product_name}</Text>
-                    <Text style={styles.itemCode}>{item.product_code}</Text>
-                  </View>
-                  <View style={styles.itemRight}>
-                    <Text style={styles.itemQuantity}>{item.quantity}x</Text>
-                    <Text style={styles.itemTotal}>
-                      UGX {item.total ? parseFloat(item.total).toFixed(0) : (parseFloat(item.price) * item.quantity).toFixed(0)}
-                    </Text>
-                  </View>
+          {/* Items Card */}
+          <View style={styles.infoCard}>
+            <Text style={styles.cardTitle}>Items ({invoice.items.length})</Text>
+            {invoice.items.map((item: InvoiceItem, index: number) => (
+              <View key={index} style={styles.itemCard}>
+                <View style={styles.itemHeader}>
+                  <Text style={styles.itemName}>{item.product_name}</Text>
+                  <Text style={styles.itemQuantityBadge}>{item.quantity}x</Text>
                 </View>
-              ))}
-            </View>
+                <Text style={styles.itemCode}>Code: {item.product_code}</Text>
+                <View style={styles.itemFooter}>
+                  <Text style={styles.itemPrice}>
+                    UGX {parseFloat(item.price).toFixed(0)} each
+                  </Text>
+                  <Text style={styles.itemTotal}>
+                    UGX {item.total ? parseFloat(item.total).toFixed(0) : (parseFloat(item.price) * item.quantity).toFixed(0)}
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
 
           {/* Notes (if available) */}
           {invoice.notes && (
-            <View style={styles.notesSection}>
-              <Text style={styles.sectionTitle}>Notes</Text>
-              <Text style={styles.notesText}>{invoice.notes}</Text>
+            <View style={styles.notesCard}>
+              <Ionicons name="document-text-outline" size={20} color={theme.colors.gray600} />
+              <View style={styles.notesContent}>
+                <Text style={styles.notesLabel}>Notes</Text>
+                <Text style={styles.notesText}>{invoice.notes}</Text>
+              </View>
             </View>
           )}
 
-          {/* Summary */}
-          <View style={styles.summarySection}>
+          {/* Summary Card */}
+          <View style={styles.summaryCard}>
+            <Text style={styles.cardTitle}>Summary</Text>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLabel}>Subtotal</Text>
               <Text style={styles.summaryValue}>UGX {parseFloat(invoice.subtotal).toFixed(0)}</Text>
@@ -198,35 +254,40 @@ export const InvoiceDetailsScreen = () => {
                 </Text>
               </View>
             )}
-            <View style={[styles.summaryRow, styles.totalRow]}>
-              <Text style={styles.totalLabel}>Total</Text>
+            <View style={styles.divider} />
+            <View style={styles.totalRow}>
+              <Text style={styles.totalLabel}>Total Amount</Text>
               <Text style={styles.totalValue}>UGX {parseFloat(invoice.total).toFixed(0)}</Text>
             </View>
           </View>
 
-          {/* Footer Info */}
-          <View style={styles.footerInfo}>
-            <Text style={styles.footerText}>Payment Method: Cash</Text>
+          {/* Payment Info */}
+          <View style={styles.paymentInfo}>
+            <View style={styles.paymentRow}>
+              <Ionicons name="cash-outline" size={18} color={theme.colors.gray500} />
+              <Text style={styles.paymentText}>Payment Method: Cash</Text>
+            </View>
             {invoice.synced_at && (
-              <Text style={styles.footerText}>
-                Synced: {format(new Date(invoice.synced_at), 'MMM d, h:mm a')}
-              </Text>
+              <View style={styles.paymentRow}>
+                <Ionicons name="cloud-done-outline" size={18} color={theme.colors.success} />
+                <Text style={styles.paymentText}>
+                  Synced: {format(new Date(invoice.synced_at), 'MMM dd, h:mm a')}
+                </Text>
+              </View>
             )}
-            <Text style={styles.invoiceId}>ID: {invoice.id}</Text>
           </View>
         </View>
       </ScrollView>
 
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>
-        <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-          <Text style={styles.actionButtonText}>Share</Text>
+        <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
+          <Ionicons name="share-social" size={20} color={theme.colors.white} />
+          <Text style={styles.shareButtonText}>Share</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionButton} onPress={handleExport}>
-          <Text style={styles.actionButtonText}>Export</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.printButton]} onPress={handlePrint}>
-          <Text style={[styles.actionButtonText, { color: theme.colors.white }]}>Print</Text>
+        <TouchableOpacity style={styles.pdfButton} onPress={handleSavePDF}>
+          <Ionicons name="document-text" size={20} color={theme.colors.primary} />
+          <Text style={styles.pdfButtonText}>Save PDF</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -236,199 +297,226 @@ export const InvoiceDetailsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.white,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.md,
     backgroundColor: theme.colors.white,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
-  headerButton: {
-    padding: theme.spacing.sm,
-  },
-  headerTitle: {
-    fontSize: theme.typography.sizes.lg,
-    fontWeight: theme.typography.weights.semibold,
+  screenTitle: {
+    fontSize: theme.typography.sizes.xxl,
+    fontWeight: theme.typography.weights.bold,
     color: theme.colors.black,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    gap: theme.spacing.sm,
   },
   scrollView: {
     flex: 1,
   },
-  invoiceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    padding: theme.spacing.md,
-    backgroundColor: theme.colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
+  invoiceHeaderCard: {
+    backgroundColor: theme.colors.gray50,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.sm,
+    gap: theme.spacing.md,
   },
-  headerInfo: {
-    flex: 1,
+  invoiceNumberSection: {
+    gap: theme.spacing.xs,
   },
-  invoiceNumber: {
-    fontSize: theme.typography.sizes.xxl,
-    fontWeight: theme.typography.weights.bold,
-    color: theme.colors.primary,
-    marginBottom: theme.spacing.xs,
-  },
-  invoiceDate: {
-    fontSize: theme.typography.sizes.sm,
-    color: theme.colors.gray600,
-  },
-  statusBadge: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.borderRadius.sm,
-  },
-  statusText: {
+  invoiceNumberLabel: {
     fontSize: theme.typography.sizes.xs,
     fontWeight: theme.typography.weights.semibold,
-    color: theme.colors.white,
+    color: theme.colors.gray500,
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  invoiceNumber: {
+    fontSize: theme.typography.sizes.xxxl,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
+    letterSpacing: -0.5,
+  },
+  invoiceMeta: {
+    flexDirection: 'row',
+    gap: theme.spacing.lg,
+  },
+  metaItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+  },
+  metaText: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray600,
+    fontWeight: theme.typography.weights.medium,
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+    alignSelf: 'flex-start',
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.lg,
+    borderWidth: 2,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  statusText: {
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.bold,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   content: {
     padding: theme.spacing.md,
+    gap: theme.spacing.md,
   },
-  sectionTitle: {
-    fontSize: theme.typography.sizes.sm,
-    fontWeight: theme.typography.weights.semibold,
-    color: theme.colors.black,
-    marginBottom: theme.spacing.sm,
-  },
-  infoGrid: {
-    flexDirection: 'row',
-    marginBottom: theme.spacing.md,
-    gap: theme.spacing.sm,
-  },
-  infoItem: {
-    flex: 1,
+  infoCard: {
     backgroundColor: theme.colors.gray50,
-    padding: theme.spacing.sm,
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.lg,
+    gap: theme.spacing.md,
+  },
+  cardTitle: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.black,
+    marginBottom: theme.spacing.xs,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+  },
+  infoContent: {
+    flex: 1,
+    gap: theme.spacing.xs,
   },
   infoLabel: {
     fontSize: theme.typography.sizes.xs,
     color: theme.colors.gray500,
-    marginBottom: theme.spacing.xs,
+    fontWeight: theme.typography.weights.medium,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   infoValue: {
-    fontSize: theme.typography.sizes.sm,
+    fontSize: theme.typography.sizes.md,
     fontWeight: theme.typography.weights.semibold,
     color: theme.colors.black,
   },
-  customerSection: {
-    marginBottom: theme.spacing.md,
-  },
-  customerDetails: {
-    backgroundColor: theme.colors.gray50,
-    padding: theme.spacing.sm,
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  customerText: {
-    fontSize: theme.typography.sizes.sm,
-    color: theme.colors.black,
-    marginBottom: theme.spacing.xs,
-  },
-  itemsSection: {
-    marginBottom: theme.spacing.md,
-  },
-  itemsList: {
-    backgroundColor: theme.colors.white,
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  itemRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: theme.spacing.sm,
+  itemCard: {
+    padding: theme.spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.divider,
+    gap: theme.spacing.sm,
   },
-  itemLeft: {
-    flex: 1,
+  itemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
   itemName: {
-    fontSize: theme.typography.sizes.sm,
-    fontWeight: theme.typography.weights.medium,
+    flex: 1,
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
     color: theme.colors.black,
-    marginBottom: theme.spacing.xs,
+    marginRight: theme.spacing.sm,
+  },
+  itemQuantityBadge: {
+    fontSize: theme.typography.sizes.sm,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
+    backgroundColor: theme.colors.primary + '15',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.sm,
   },
   itemCode: {
     fontSize: theme.typography.sizes.xs,
     color: theme.colors.gray500,
     fontFamily: 'monospace',
   },
-  itemRight: {
-    alignItems: 'flex-end',
+  itemFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: theme.spacing.xs,
   },
-  itemQuantity: {
-    fontSize: theme.typography.sizes.xs,
+  itemPrice: {
+    fontSize: theme.typography.sizes.sm,
     color: theme.colors.gray600,
-    marginBottom: theme.spacing.xs,
   },
   itemTotal: {
-    fontSize: theme.typography.sizes.sm,
-    fontWeight: theme.typography.weights.semibold,
+    fontSize: theme.typography.sizes.lg,
+    fontWeight: theme.typography.weights.bold,
     color: theme.colors.black,
   },
-  notesSection: {
-    marginBottom: theme.spacing.md,
+  notesCard: {
+    flexDirection: 'row',
+    backgroundColor: theme.colors.warning + '10',
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.lg,
+    borderLeftWidth: 4,
+    borderLeftColor: theme.colors.warning,
+    gap: theme.spacing.md,
+  },
+  notesContent: {
+    flex: 1,
+    gap: theme.spacing.xs,
+  },
+  notesLabel: {
+    fontSize: theme.typography.sizes.xs,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.gray700,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   notesText: {
     fontSize: theme.typography.sizes.sm,
     color: theme.colors.gray700,
-    backgroundColor: theme.colors.gray50,
-    padding: theme.spacing.sm,
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    fontStyle: 'italic',
+    lineHeight: 20,
   },
-  summarySection: {
+  summaryCard: {
     backgroundColor: theme.colors.white,
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    padding: theme.spacing.sm,
-    marginBottom: theme.spacing.md,
+    padding: theme.spacing.lg,
+    borderRadius: theme.borderRadius.lg,
+    gap: theme.spacing.md,
   },
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: theme.spacing.xs,
+    alignItems: 'center',
   },
   summaryLabel: {
-    fontSize: theme.typography.sizes.sm,
+    fontSize: theme.typography.sizes.md,
     color: theme.colors.gray600,
+    fontWeight: theme.typography.weights.medium,
   },
   summaryValue: {
-    fontSize: theme.typography.sizes.sm,
-    fontWeight: theme.typography.weights.medium,
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.semibold,
     color: theme.colors.black,
   },
+  divider: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+    marginVertical: theme.spacing.sm,
+  },
   totalRow: {
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
-    paddingTop: theme.spacing.sm,
-    marginTop: theme.spacing.sm,
-    marginBottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: theme.colors.primary + '10',
+    padding: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+    marginTop: theme.spacing.xs,
   },
   totalLabel: {
     fontSize: theme.typography.sizes.md,
@@ -436,51 +524,63 @@ const styles = StyleSheet.create({
     color: theme.colors.black,
   },
   totalValue: {
-    fontSize: theme.typography.sizes.lg,
+    fontSize: theme.typography.sizes.xxl,
     fontWeight: theme.typography.weights.bold,
     color: theme.colors.primary,
+    letterSpacing: -0.5,
   },
-  footerInfo: {
-    paddingTop: theme.spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: theme.colors.border,
+  paymentInfo: {
+    gap: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
   },
-  footerText: {
-    fontSize: theme.typography.sizes.xs,
-    color: theme.colors.gray500,
-    marginBottom: theme.spacing.xs,
+  paymentRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
   },
-  invoiceId: {
-    fontSize: theme.typography.sizes.xs,
-    color: theme.colors.gray400,
-    fontFamily: 'monospace',
+  paymentText: {
+    fontSize: theme.typography.sizes.sm,
+    color: theme.colors.gray600,
   },
   bottomActions: {
     flexDirection: 'row',
-    padding: theme.spacing.sm,
+    padding: theme.spacing.md,
     backgroundColor: theme.colors.white,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,
-    gap: theme.spacing.xs,
+    gap: theme.spacing.md,
   },
-  actionButton: {
+  shareButton: {
     flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: theme.colors.gray50,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  actionButtonText: {
-    fontSize: theme.typography.sizes.xs,
-    fontWeight: theme.typography.weights.semibold,
-    color: theme.colors.black,
-  },
-  printButton: {
+    gap: theme.spacing.sm,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.lg,
     backgroundColor: theme.colors.primary,
+  },
+  shareButtonText: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.white,
+  },
+  pdfButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing.sm,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.lg,
+    backgroundColor: theme.colors.white,
+    borderWidth: 2,
     borderColor: theme.colors.primary,
+  },
+  pdfButtonText: {
+    fontSize: theme.typography.sizes.md,
+    fontWeight: theme.typography.weights.bold,
+    color: theme.colors.primary,
   },
   errorContainer: {
     flex: 1,
